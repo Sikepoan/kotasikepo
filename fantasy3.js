@@ -4,11 +4,15 @@ window.FANT3 = (function () {
   const rnd = s => { const x = Math.sin(s * 12.9898) * 43758.5453; return x - Math.floor(x); };
   const ISL = { cx: 180, cy: 150, hw: 172, hh: 88 };
   const CAMP = { x: 172, y: 162, rx: 46, ry: 22 };
+  let LAHAN = 0, TAV = -1; const TIMG = []; let onImg = null;
+  for (let i = 0; i < 5; i++) { const im = new Image(); im.onload = () => onImg && onImg(); im.src = 'img/tavern_' + i + '.png'; TIMG.push(im); }
+  const setLuas = k => { ISL.hw = Math.round(172 + 30 * k); ISL.hh = Math.round(88 + 34 * k); ISL.cy = Math.round(150 + 16 * k); };
+  const setLahan = k => { LAHAN = Math.max(0, Math.min(1, k)); CAMP.rx = Math.round(46 + 40 * LAHAN); CAMP.ry = Math.round(22 + 20 * LAHAN); CAMP.y = Math.round(162 + 4 * LAHAN); };
   const RIV = [[268, 92], [282, 120], [290, 150], [300, 178], [318, 196]];          // sungai: dari kaki gunung ke tepi kanan pulau
   const EYES = [[168, 58], [192, 58]];
   const distRiver = (x, y) => { let d = 1e9; for (let i = 0; i < RIV.length - 1; i++) { const [ax, ay] = RIV[i], [bx, by] = RIV[i + 1], vx = bx - ax, vy = by - ay, k = Math.max(0, Math.min(1, ((x - ax) * vx + (y - ay) * vy) / (vx * vx + vy * vy))); d = Math.min(d, Math.hypot(x - ax - vx * k, y - ay - vy * k)); } return d; };
   const inIsl = (x, y, m) => Math.abs(x - ISL.cx) / (ISL.hw - m * 2) + Math.abs(y - ISL.cy) / (ISL.hh - m) <= 1;
-  const walk = (x, y) => inIsl(x, y, 6) && distRiver(x, y) > 11 && y > 86;
+  const walk = (x, y) => inIsl(x, y, 6) && distRiver(x, y) > 11 && y > 86 && !(TAV >= 0 && Math.abs(x - CAMP.x) < 42 && y > CAMP.y - 30 && y < CAMP.y + 12);
   function mountain(g) {   // pegunungan penuh di belakang pulau (menutup laut atas)
     R(g, 0, 0, 360, 300, '#1a2e24');                                          // lembah hutan gelap (ganti laut)
     for (let i = 0; i < 160; i++) { const x = (i * 37) % 360, y = 150 + ((i * 53) % 150); R(g, x - 4, y - 6, 9, 6, i % 2 ? '#1f3a2a' : '#173024'); R(g, x - 1, y - 9, 3, 3, '#24452f'); }
@@ -51,6 +55,8 @@ window.FANT3 = (function () {
     [[110, 140], [240, 190], [90, 190]].forEach(([x, y]) => L.push([y, g => { R(g, x - 4, y - 5, 8, 5, '#8a8a96'); R(g, x - 3, y - 6, 6, 2, '#a8a8b4'); R(g, x + 2, y - 4, 2, 4, '#6a6a76'); }]));
     return L;
   }
-  const huddle = n => { const a = (n * 2.39996) % (Math.PI * 2), r = 6 + (n % 5) * 5; return { x: CAMP.x + Math.cos(a) * r * 1.6, y: CAMP.y + Math.sin(a) * r * 0.7 }; };
-  return { setTents: n => { TENTS = Math.max(0, Math.min(8, n | 0)); }, tents: () => TENTS, lights: () => TENTS > 0 ? [[CAMP.x, CAMP.y - 4, 22]] : [], ISL, CAMP, EYES, walk, mountain, ground, sprites, huddle, HOME: { x: CAMP.x, y: CAMP.y - 2 } };
+  const huddle = n => { if (TAV >= 4) { const a = rnd(n * 3.3), b = rnd(n * 7.1); return { x: CAMP.x - 34 + a * 68, y: CAMP.y + 32 + b * 12 }; } const a = (n * 2.39996) % (Math.PI * 2), r = 6 + (n % 5) * 5; return { x: CAMP.x + Math.cos(a) * r * 1.6, y: CAMP.y + Math.sin(a) * r * 0.7 }; };
+  const HOMEO = { x: CAMP.x, y: CAMP.y - 2 };
+  const drawTop = (c, toS, z) => { if (TAV < 0 || !TIMG[TAV].complete || !TIMG[TAV].naturalWidth) return; const s2 = 0.72, [a, b] = toS(CAMP.x - 75 * s2, CAMP.y + 12 - 118 * s2); c.imageSmoothingEnabled = false; c.drawImage(TIMG[TAV], Math.round(a), Math.round(b), Math.round(150 * s2 * z), Math.round(140 * s2 * z)); };
+  return { drawTop, setLahan, setLuas, setTavern: n => { TAV = n | 0; HOMEO.y = TAV >= 0 ? CAMP.y + 30 : CAMP.y - 2; }, tavern: () => TAV, onImg: f => { onImg = f; }, door: () => ({ x: CAMP.x, y: CAMP.y + 10 }), setTents: n => { TENTS = Math.max(0, Math.min(8, n | 0)); }, tents: () => TENTS, lights: () => TAV >= 4 ? [[CAMP.x - 10, CAMP.y - 6, 14], [CAMP.x + 10, CAMP.y - 6, 14], [CAMP.x - 47, CAMP.y + 2, 12], [CAMP.x + 47, CAMP.y + 2, 12], [CAMP.x, CAMP.y - 30, 18]] : TENTS > 0 ? [[CAMP.x, CAMP.y - 4, 22]] : [], ISL, CAMP, EYES, walk, mountain, ground, sprites, huddle, HOME: HOMEO };
 })();

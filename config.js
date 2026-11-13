@@ -7,7 +7,7 @@ window.SIKEPO_CONFIG = {
   // link tombol "Komen di sini" & sosial media
   // Login Google: ubah ke true SETELAH provider Google aktif di Supabase (Authentication > Providers > Google)
   GOOGLE_LOGIN: false,
-  LINK_IG: 'https://www.instagram.com/kepoan.sih/',
+  LINK_IG: 'https://www.instagram.com/kepodungeon/',
   LINK_TIKTOK: 'https://www.tiktok.com/@walikot.udin',
-  LINK_YOUTUBE: 'https://www.youtube.com/channel/UC70nq_dGrh_cdjw-gsdVrbA'
+  LINK_YOUTUBE: 'https://www.youtube.com/@sikepo_an'
 };

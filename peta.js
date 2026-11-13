@@ -222,7 +222,7 @@
     c.fillRect(Math.round(sx - 2 * sc), y + h, 4 * sc, 4 * sc);
     lines.forEach((l, i) => SK.txt(c, l, x + 6 * sc, y + 5 * sc + i * 10 * sc, sc, '#1c1c24', null));
   }
-  function udinLabel(c) {
+  function udinLabel(c) { if (window.PETA_HIDE) return;
     const [sx, sy] = toScreen(U.x, U.y), s = Math.max(1, Math.round(cam.z * dpr)), sc = Math.max(1, Math.round(dpr * (cam.z >= 3 ? 2 : 1)));
     const txt = FMODE ? 'UDIN THE GOBLIN' : U.sleep ? 'UDIN (TIDUR)' : 'WALI KOTA UDIN', w = SK.tw(txt, sc), y = sy - (U.sleep ? 8 : 19) * s - 11 * sc;
     c.fillStyle = 'rgba(224,47,47,0.92)'; c.fillRect(Math.round(sx - w / 2 - 3 * sc), Math.round(y - 2 * sc), w + 6 * sc, 11 * sc);
@@ -277,8 +277,11 @@
     // sprites sorted by y
     const list = P.walkers.slice().sort((a, b) => a.y - b.y);
     let udDrawn = false;
+    if (!window.PETA_HIDE) {
     for (const o of list) { if (!udDrawn && o.y > U.y) { drawUdin(cx, night, t); udDrawn = true; } drawWalker(cx, o, t); }
     if (!udDrawn) drawUdin(cx, night, t);
+    }
+    if (FMODE && FANT3.drawTop) FANT3.drawTop(cx, toScreen, cam.z * dpr);
     if (FMODE) { const ph = (t % 45) / 45; if (ph < 0.4) { const k = ph / 0.4, sx = -60 + k * (WW + 120), sy = 260 - k * 220, z = cam.z * dpr, [a, b2] = toScreen(sx, sy);
       cx.save(); cx.translate(a, b2); cx.rotate(Math.atan2(-220, WW + 120) + Math.PI / 2); cx.scale(z * 0.9, z * 0.9); cx.fillStyle = 'rgba(10,15,25,0.28)';
       const flap = Math.sin(t * 5) * 3, P = pts => { cx.beginPath(); pts.forEach(([x, y], i) => i ? cx.lineTo(x, y) : cx.moveTo(x, y)); cx.closePath(); cx.fill(); };
@@ -351,6 +354,8 @@
     isNight() { return nightK(window.SIKEPO_FORCE_HOUR ?? wibHour()) > 0.6; },
     cuaca: () => WX.name,
     fantasy: () => FMODE,
+    redraw() { if (g) { applyLayout(); if (window.FANT3) LIGHTS = []; g.clearRect(0, 0, WW, WH); drawBg(); } },
+    cam(x, y, z) { cam.x = x; cam.y = y; cam.z = z; clampCam(); },
     setTents(n) { if (!window.FANT3 || FANT3.tents() === (n | 0)) return; FANT3.setTents(n); if (FMODE && g) { g.clearRect(0, 0, WW, WH); drawBg(); } },
     wib: wibHour
   };

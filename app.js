@@ -86,13 +86,16 @@
     const li = $('caraLike'); if (li && !li.dataset.done) { li.dataset.done = 1; li.innerHTML = '<b>Like</b> &amp; share videonya biar kotanya makin rame. Sekarang bangun apa aja <b>tanpa budget</b>!'; } }
   // Kepo Fantasy (12 Nov 18.00 WIB): panel misi; Poin Guild disimpan di kolom stats.koin, tenda di stats.bangunan
   const Q = { target: 200 };
-  function applyFantasy() { const f = PETA.fantasy && PETA.fantasy(); $('quest').hidden = !f; if (!f) return; if (PETA.setTents && ST.stats) PETA.setTents(ST.stats.bangunan || 0); document.body.classList.add('fantasy'); if (!ST.fx) { ST.fx = 1; const fs = document.querySelector('fieldset.kat'); if (fs) fs.hidden = true; const h2 = document.querySelector('#kartu h2'); if (h2) h2.textContent = 'Bikin Kartu Petualang';
+  function applyFantasy() { const f = PETA.fantasy && PETA.fantasy(); $('quest').hidden = !f; if (!f) return; if (PETA.setTents && ST.stats && (ST.stats.hari || 0) < 3) PETA.setTents(ST.stats.bangunan || 0); document.body.classList.add('fantasy'); if (!ST.fx) { ST.fx = 1; const fs = document.querySelector('fieldset.kat'); if (fs) fs.hidden = true; const h2 = document.querySelector('#kartu h2'); if (h2) h2.textContent = 'Bikin Kartu Petualang';
       const ld = document.querySelector('#kartu .lead'); if (ld) ld.textContent = 'Isi username, pilih job petualangmu, dan kartumu langsung jadi. Namamu ikut bertualang di peta Kepo Fantasy. Satu orang satu kartu ya.';
       const lb = $('avLbl'); if (lb) lb.textContent = 'PILIH JOB'; const nv = document.querySelector('nav a[href="#kartu"]'); if (nv) nv.textContent = 'Kartu Petualang';
       $('kirim').textContent = 'BIKIN KARTU PETUALANG'; buildAvs(); preview(); } const tp = $('toPov'); if (tp) tp.hidden = true; const mt = $('mapTip'); if (mt) mt.textContent = 'Geser peta · zoom · klik warga untuk lihat kartu · klik Udin The Goblin untuk disapa';
-    const s = ST.stats || {}, pts = s.koin || 0, k = Math.min(1, pts / Q.target); $('qFill').style.width = (k * 100) + '%'; $('qNum').textContent = fmt(pts) + ' / ' + fmt(Q.target) + ' POIN';
-    const lb = document.querySelector('#hBangunan') && document.querySelector('#hBangunan').previousElementSibling; if (lb) lb.textContent = 'TENDA';
-    const sl = document.querySelector('#sBangunan') && document.querySelector('#sBangunan').previousElementSibling; if (sl) sl.textContent = 'TENDA'; }
+    const s = ST.stats || {}, d3 = (s.hari || 0) >= 3; Q.target = d3 ? 150 : 200;
+    if (d3) { $('qDay').textContent = 'DAY 3'; $('qJudul').textContent = 'BANGUN BENGKEL'; $('qSub').textContent = 'Blacksmith bantu buat senjata party dungeon';
+      if (window.FANT3 && FANT3.tavern() !== 4) { FANT3.setLuas(1); FANT3.setLahan(1); FANT3.setTavern(4); FANT3.onImg(() => PETA.redraw()); PETA.setTents(0); PETA.redraw(); } }
+    const pts = s.koin || 0, k = Math.min(1, pts / Q.target); $('qFill').style.width = (k * 100) + '%'; $('qNum').textContent = fmt(pts) + ' / ' + fmt(Q.target) + ' POIN';
+    const lb = document.querySelector('#hBangunan') && document.querySelector('#hBangunan').previousElementSibling; if (lb) lb.textContent = d3 ? 'BANGUNAN' : 'TENDA';
+    const sl = document.querySelector('#sBangunan') && document.querySelector('#sBangunan').previousElementSibling; if (sl) sl.textContent = d3 ? 'BANGUNAN' : 'TENDA'; }
   function clock() { applyKoin(); applyFantasy();
     const h = PETA.wib(), hh = Math.floor(h), mm = Math.round((h - hh) * 60) % 60;
     $('clock').textContent = String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
