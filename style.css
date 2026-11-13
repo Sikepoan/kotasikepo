@@ -151,3 +151,10 @@ input:focus-visible, button:focus-visible, a:focus-visible { outline: 3px solid 
 
 .rules { margin-top: 10px; align-items: center; }
 .rules .lbl { font-family: var(--display); font-size: 11px; color: #ffd84a; margin-right: 4px; }
+
+.akun { display: flex; align-items: center; gap: 8px; margin-left: auto; margin-right: 12px; font-family: var(--display); font-size: 10px; }
+.akun img { width: 26px; height: 26px; border: 2px solid #ffd84a; image-rendering: auto; }
+.akun .nm { color: #ffd84a; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.btn.google { background: #ffffff; color: #1c1c24; }
+.login-box h3 { margin-top: 0; }
+@media (max-width: 600px) { .akun .nm { display: none; } }

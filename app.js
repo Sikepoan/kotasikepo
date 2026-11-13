@@ -131,6 +131,15 @@
   // sosial media
   [['INSTAGRAM', C.LINK_IG], ['TIKTOK', C.LINK_TIKTOK], ['YOUTUBE', C.LINK_YOUTUBE]].forEach(([k, u]) => { if (!u) return; ['sosmed', 'sosTop', 'sosFoot'].forEach(id => { const box = $(id); if (!box) return; const a = document.createElement('a'); a.className = 'btn sm sos ' + k.toLowerCase(); a.href = u; a.target = '_blank'; a.rel = 'noopener'; a.textContent = (id === 'sosTop' ? 'FOLLOW ' : '') + k; box.append(a); }); });
 
+  // ---------- akun Google ----------
+  function renderAkun() { const box = $('akun'); if (!C.GOOGLE_LOGIN || DATA.mode !== 'live') { box.hidden = true; $('perluLogin').hidden = true; return; }
+    const ak = DATA.akun(); box.hidden = false; box.innerHTML = '';
+    if (ak) { if (ak.foto) { const im = document.createElement('img'); im.src = ak.foto; im.alt = ''; im.referrerPolicy = 'no-referrer'; box.append(im); }
+      const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = ak.nama; const out = document.createElement('button'); out.className = 'btn sm alt'; out.type = 'button'; out.textContent = 'KELUAR'; out.onclick = () => DATA.logout(); box.append(nm, out); }
+    else { const b = document.createElement('button'); b.className = 'btn sm google'; b.type = 'button'; b.textContent = 'MASUK GOOGLE'; b.onclick = goLogin; box.append(b); }
+    const need = !ak && !ST.mine; $('perluLogin').hidden = !need; $('daftar').hidden = need || !!ST.mine; }
+  async function goLogin() { try { await DATA.loginGoogle(); } catch (e) { status('Login Google belum bisa. Coba lagi nanti.', true); } }
+  $('btnGoogle2').onclick = goLogin;
   // ---------- boot ----------
   (async () => {
     if (DATA.mode === 'demo') { $('demoBar').hidden = false; $('fMode').textContent = 'mode demo'; } else $('fMode').textContent = 'peta live';
@@ -143,6 +152,7 @@
       await bgReady; renderStats();
       if (mine) showMine(mine); else preview();
     } catch (e) { status('Data kota belum bisa dimuat. Coba muat ulang halaman.', true); await bgReady; preview(); renderStats(); }
+    renderAkun(); DATA.onAuth(async () => { renderAkun(); const m = await DATA.myCard(); if (m) showMine(m); });
     DATA.onNew(w => { if (ST.warga.some(x => x.no === w.no)) return; ST.warga.push(w); PETA.add(w); renderStats(); });
   })();
 })();

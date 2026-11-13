@@ -24,6 +24,7 @@
 <header class="top">
   <div class="wrap top-in">
     <a class="logo" href="#peta"><span class="logo-k">KOTA</span> SIKEPO</a>
+    <div class="akun" id="akun" hidden></div>
     <nav class="nav" aria-label="Menu">
       <a href="#peta">Peta</a><a href="#kartu">Kartu Warga</a><a href="#statistik">Statistik</a>
     </nav>
@@ -85,6 +86,12 @@
         <h2>Bikin Kartu Warga</h2>
         <p class="lead">Isi username kamu, pilih karakter, dan kartumu langsung jadi. Namamu otomatis ikut jalan-jalan di peta. Satu orang satu kartu ya.</p>
 
+        <div id="perluLogin" class="panel login-box" hidden>
+          <h3>Masuk dulu ya!</h3>
+          <p>Untuk bikin Kartu Petualang &amp; ikut fitur guild, masuk pakai akun Google.</p>
+          <button class="btn google" id="btnGoogle2" type="button">MASUK DENGAN GOOGLE</button>
+          <p class="hint">Email hanya dipakai untuk login &amp; data guild, tidak ditampilkan ke publik dan tidak dibagikan.</p>
+        </div>
         <form id="daftar" class="panel form" novalidate>
           <label for="nama">USERNAME / NAMA
             <input id="nama" type="text" maxlength="24" placeholder="contoh: @walikot.udin" autocomplete="nickname" required>

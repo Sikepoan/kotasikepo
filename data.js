@@ -2,7 +2,7 @@
 (function () {
   const C = window.SIKEPO_CONFIG || {};
   const live = !!(C.SUPABASE_URL && C.SUPABASE_ANON_KEY && window.supabase);
-  let sb = null, uid = null;
+  let sb = null, uid = null, user = null; const authL = [];
   const DEMO_KEY = 'sikepo-demo-v1';
   const demoSeed = () => ({
     warga: [
@@ -25,7 +25,8 @@
       if (!live) return;
       sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY, { auth: { persistSession: true } });
       const { data } = await sb.auth.getSession();
-      if (data && data.session) uid = data.session.user.id;
+      if (data && data.session) { uid = data.session.user.id; user = data.session.user; }
+      sb.auth.onAuthStateChange((ev, s) => { user = s ? s.user : null; uid = user ? user.id : null; authL.forEach(f => f(API.akun())); });
       sb.channel('warga-baru').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'warga' },
         p => listeners.forEach(f => f(p.new))).subscribe();
     },
@@ -73,6 +74,16 @@
       return data;
     },
     onNew(f) { listeners.push(f); },
+    // ---- akun Google ----
+    akun() { if (!user || user.is_anonymous || !user.email) return null; const m = user.user_metadata || {}; return { email: user.email, nama: m.full_name || m.name || user.email.split('@')[0], foto: m.avatar_url || m.picture || '' }; },
+    onAuth(f) { authL.push(f); },
+    async loginGoogle() {
+      if (!live) throw { kode: 'demo' };
+      const opt = { provider: 'google', options: { redirectTo: location.origin + location.pathname + '#kartu' } };
+      if (user && user.is_anonymous) { const { error } = await sb.auth.linkIdentity(opt); if (!error) return; }   // sambungkan kartu lama ke akun Google
+      const { error } = await sb.auth.signInWithOAuth(opt); if (error) throw { kode: 'login_gagal', pesan: error.message };
+    },
+    async logout() { if (live) await sb.auth.signOut(); },
     resetDemo() { try { localStorage.removeItem(DEMO_KEY); } catch (e) {} }
   };
   window.DATA = API;

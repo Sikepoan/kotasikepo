@@ -5,6 +5,8 @@ window.SIKEPO_CONFIG = {
   SUPABASE_URL: 'https://jkdxgqyzbnrpybcunaae.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_MsS1FG0krmmz3iV9VTE2qQ_tJsW0N1Q',
   // link tombol "Komen di sini" & sosial media
+  // Login Google: ubah ke true SETELAH provider Google aktif di Supabase (Authentication > Providers > Google)
+  GOOGLE_LOGIN: false,
   LINK_IG: 'https://www.instagram.com/kepoan.sih/',
   LINK_TIKTOK: 'https://www.tiktok.com/@walikot.udin',
   LINK_YOUTUBE: 'https://www.youtube.com/channel/UC70nq_dGrh_cdjw-gsdVrbA'
