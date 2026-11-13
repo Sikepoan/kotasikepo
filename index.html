@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kota Sikepo — Peta Live</title>
+<meta name="description" content="Kota Sikepo, kota yang dibangun dari komen. Follow = jadi warga. Bikin Kartu Warga, namamu ikut jalan-jalan di peta.">
+<meta property="og:title" content="Kota Sikepo — Peta Live">
+<meta property="og:description" content="Kota yang dibangun dari komen. Bikin Kartu Warga, namamu ikut jalan-jalan di peta.">
+<meta property="og:image" content="https://kotasikepo.com/img/og.png">
+<meta property="og:url" content="https://kotasikepo.com/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://kotasikepo.com/">
+<meta name="theme-color" content="#141a2e">
+<link rel="icon" href="img/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="demoBar" class="demo" hidden>MODE DEMO: belum tersambung database, data contoh tersimpan di browser ini saja.</div>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="logo" href="#peta"><span class="logo-k">KOTA</span> SIKEPO</a>
+    <nav class="nav" aria-label="Menu">
+      <a href="#peta">Peta</a><a href="#kartu">Kartu Warga</a><a href="#statistik">Statistik</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section id="peta" class="peta-sec">
+    <div class="wrap">
+      <div class="intro">
+        <h1>Kota yang dibangun dari komen.</h1>
+        <p>Follow = jadi warga. Bikin Kartu Warga, namamu ikut jalan-jalan di peta Kota Sikepo.</p>
+        <div class="btns sos-top" id="sosTop" aria-label="Follow Wali Kota Udin"></div>
+      </div>
+      <div class="peta-box">
+        <canvas id="map" aria-label="Peta live Kota Sikepo. Geser untuk menjelajah, scroll atau cubit untuk zoom, klik warga untuk melihat kartunya."></canvas>
+        <div class="hud">
+          <div class="chip"><span class="k">WARGA</span><b id="hWarga">—</b></div>
+          <div class="chip"><span class="k">BANGUNAN</span><b id="hBangunan">—</b></div>
+          <div class="chip gold" id="chipKoin"><span class="k">KOIN</span><b id="hKoin">—</b></div>
+        </div>
+        <div class="clock"><span id="clock">--:--</span> WIB · <span id="fase">—</span></div>
+        <div class="tools">
+          <button class="tbtn" id="zIn" aria-label="Perbesar">+</button>
+          <button class="tbtn" id="zOut" aria-label="Perkecil">−</button>
+          <button class="tbtn" id="zReset" aria-label="Lihat seluruh kota">⌂</button>
+          <button class="tbtn wide" id="allNames" aria-pressed="false">NAMA</button>
+          <button class="tbtn wide" id="toPov" aria-label="Masuk kebun sawit (POV)">KEBUN</button>
+        </div>
+        <form class="cari" id="cari" role="search">
+          <label for="q" class="sr">Cari nama warga</label>
+          <input id="q" type="search" placeholder="Cari namamu di peta…" autocomplete="off" maxlength="24">
+          <button class="btn sm" type="submit">CARI</button>
+        </form>
+        <div class="pick" id="pick" hidden>
+          <button class="x" id="pickX" aria-label="Tutup">×</button>
+          <canvas id="pickCard" width="340" height="240"></canvas>
+          <p id="pickTxt"></p>
+        </div>
+        <div class="quest" id="quest" hidden>
+          <div class="q-tag">MISI <span id="qDay">DAY 2</span></div>
+          <b id="qJudul">BANGUN TAVERN GUILD</b>
+          <span class="q-sub" id="qSub">Tempat berkumpul &amp; daftar job</span>
+          <div class="q-bar"><i id="qFill"></i><span id="qNum">0 / 200</span></div>
+          <span class="q-pts">❤ +1 · 💬 +3 · 📤 +10 · 🔁 REPOST +30</span>
+        </div>
+        <p class="maptip" id="mapTip">Geser peta · zoom · klik warga untuk lihat kartu · klik Wali Kota Udin untuk disapa</p>
+      </div>
+      <p class="pengumuman" id="pengumuman" hidden></p>
+      <div class="btns rules" id="rules"><span class="lbl">ATURAN KEPO FANTASY:</span>
+        <a class="btn sm sos instagram" href="https://www.instagram.com/p/Dfo5iAJkUYw/" target="_blank" rel="noopener">BACA DI INSTAGRAM</a>
+        <a class="btn sm sos tiktok" href="https://vt.tiktok.com/ZSpHW39xm/" target="_blank" rel="noopener">BACA DI TIKTOK</a></div>
+    </div>
+  </section>
+
+  <section id="kartu" class="sec">
+    <div class="wrap grid2">
+      <div class="col">
+        <h2>Bikin Kartu Warga</h2>
+        <p class="lead">Isi username kamu, pilih karakter, dan kartumu langsung jadi. Namamu otomatis ikut jalan-jalan di peta. Satu orang satu kartu ya.</p>
+
+        <form id="daftar" class="panel form" novalidate>
+          <label for="nama">USERNAME / NAMA
+            <input id="nama" type="text" maxlength="24" placeholder="contoh: @walikot.udin" autocomplete="nickname" required>
+          </label>
+          <p class="hint">Huruf, angka, titik, garis bawah, @ dan spasi. 2–24 karakter.</p>
+          <fieldset class="kat">
+            <legend>KATEGORI</legend>
+            <label class="radio"><input type="radio" name="kat" value="WARGA" checked> <span>WARGA</span> biasa</label>
+            <label class="radio"><input type="radio" name="kat" value="TUKANG"> <span>TUKANG</span> mau bantu bangun kota</label>
+          </fieldset>
+          <div>
+            <span class="lbl" id="avLbl">KARAKTER FOTO</span>
+            <div class="avs" id="avs" role="radiogroup" aria-labelledby="avLbl"></div>
+          </div>
+          <button class="btn" id="kirim" type="submit">BIKIN KARTU &amp; MASUK PETA</button>
+          <p class="status" id="status" role="status"></p>
+        </form>
+
+        <div id="punya" class="panel done" hidden>
+          <h3>Kartumu sudah jadi!</h3>
+          <p id="punyaTxt"></p>
+          <div class="btns">
+            <a class="btn" id="dlStory" download>SIMPAN STORY 1080×1920</a>
+            <a class="btn alt" id="dlKartu" download>SIMPAN KARTU SAJA</a>
+            <button class="btn alt" id="lihatPeta" type="button">LIHAT AKU DI PETA</button>
+          </div>
+          <p class="hint">Upload kartunya ke story &amp; tag akun Wali Kota Udin, biar warga lain tahu.</p>
+        </div>
+      </div>
+      <div class="col tray">
+        <canvas id="prev" width="360" height="640" aria-label="Pratinjau kartu warga"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <section id="statistik" class="sec alt-bg">
+    <div class="wrap">
+      <h2>Statistik Kota</h2>
+      <div class="stats">
+        <div class="stat big"><span class="k">TOTAL WARGA</span><b id="sTotal">—</b><span class="s">follower dari 3 wilayah</span></div>
+        <div class="stat"><span class="k">PUNYA KARTU</span><b id="sKartu">—</b><span class="s">warga di peta</span></div>
+        <div class="stat" id="statKoin"><span class="k">KOIN</span><b id="sKoin">—</b><span class="s">1 like = 1 koin</span></div>
+        <div class="stat"><span class="k">BANGUNAN</span><b id="sBangunan">—</b><span class="s">hari ke-<span id="sHari">—</span></span></div>
+      </div>
+      <div class="grid2 gap">
+        <div class="panel">
+          <h3>Warga per wilayah</h3>
+          <div class="bars" id="bars"></div>
+          <p class="hint" id="sUpdated"></p>
+        </div>
+        <div class="panel">
+          <h3>Warga baru di peta</h3>
+          <ol class="baru" id="baru"></ol>
+        </div>
+      </div>
+      <div class="panel cara">
+        <h3>Cara jadi warga Sikepo</h3>
+        <ol>
+          <li><b>Follow</b> akun Wali Kota Udin = resmi jadi warga.</li>
+          <li><b>Komen</b> mau dibangun apa. Komen paling banyak like yang dibangun.</li>
+          <li id="caraLike"><b>Like</b> videonya: 1 like = 1 koin. Koin kurang? Bangunannya menyesuaikan.</li>
+          <li><b>Bikin Kartu Warga</b> di sini, namamu ikut jalan-jalan di peta.</li>
+        </ol>
+        <div class="btns" id="sosmed"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="pov" id="pov" role="dialog" aria-modal="true" aria-label="POV kebun sawit" hidden>
+  <canvas id="povCanvas" aria-label="Pemandangan kebun sawit dari mata Wali Kota Udin. Geser untuk menoleh, ketuk pohon untuk melihat manfaat sawit."></canvas>
+  <div class="pov-top"><span class="pov-tag">POV: UDIN DI KEBUN SAWIT</span><button class="x" id="povX" aria-label="Keluar dari kebun">×</button></div>
+  <p class="pov-hint" id="povHint" hidden>Ketuk pohon ini</p>
+  <div class="pov-card" id="povCard" hidden><b></b><span></span></div>
+  <div class="pov-ctl">
+    <button class="tbtn" id="povL" aria-label="Menoleh kiri">◀</button>
+    <div class="pov-mid"><button class="tbtn" id="povFwd" aria-label="Jalan maju">▲</button><button class="tbtn" id="povBack" aria-label="Mundur">▼</button></div>
+    <button class="tbtn" id="povR" aria-label="Menoleh kanan">▶</button>
+    <button class="tbtn wide" id="povAuto" aria-pressed="false">JALAN</button>
+  </div>
+  <p class="pov-help">Geser layar untuk menoleh · ▲ jalan · ketuk pohon mana saja = manfaat sawit</p>
+</div>
+
+<footer class="foot"><div class="wrap"><div class="btns sos-foot" id="sosFoot"></div>Kota Sikepo · dibuat oleh Wali Kota Udin dan warganya · <span id="fMode"></span></div></footer>
+
+<script src="config.js"></script>
+<script src="vendor/supabase.js"></script>
+<script src="kartu.js"></script>
+<script src="data.js"></script>
+<script src="kota3.js"></script>
+<script src="fantasy3.js"></script>
+<script src="peta.js"></script>
+<script src="pov.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
