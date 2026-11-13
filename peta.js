@@ -329,6 +329,7 @@
       if (moved < (e.pointerType === 'touch' ? 14 : 6) && e.type === 'pointerup') { const r = cv.getBoundingClientRect(), [wx, wy] = toWorld(e.clientX - r.left, e.clientY - r.top); let best = null, bd = 9 / Math.max(1, cam.z / 3);
         if (Math.hypot(U.x - wx, (U.y - 7) - wy) < Math.max(6, 10 / Math.max(1, cam.z / 3))) { sapa(); return; }
         for (const o of P.walkers) { const d = Math.hypot(o.x - wx, (o.y - 5) - wy); if (d < bd) { bd = d; best = o; } }
+        if (FMODE && P.onTavern && window.FANT3 && FANT3.tavern() >= 4) { const C = FANT3.CAMP; if (Math.abs(wx - C.x) < 40 && wy > C.y - 76 && wy < C.y + 14) { P.onTavern(); return; } }
         if (!best && inDia(wx, wy + 4, PLOT, -4) && P.onSawit) { P.onSawit(); return; }
         P.sel = best; P.onPick && P.onPick(best ? best.w : null); } };
     cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
@@ -350,6 +351,7 @@
     showAll(v) { P.showAll = v; },
     onPick(f) { P.onPick = f; },
     onSawit(f) { P.onSawit = f; },
+    onTavern(f) { P.onTavern = f; },
     udinScreen() { const [x, y] = toScreen(U.x, U.y - 7); return [x / dpr, y / dpr]; },
     isNight() { return nightK(window.SIKEPO_FORCE_HOUR ?? wibHour()) > 0.6; },
     cuaca: () => WX.name,

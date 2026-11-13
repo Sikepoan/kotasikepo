@@ -161,6 +161,12 @@
   </section>
 </main>
 
+<div class="pov tav" id="tav" role="dialog" aria-modal="true" aria-label="Di dalam Tavern Guild" hidden>
+  <canvas id="tavCanvas" aria-label="Interior Tavern Guild. Ketuk warga, bartender, atau Udin untuk ngobrol."></canvas>
+  <div class="pov-top"><span class="pov-tag">TAVERN GUILD KEPO</span><button class="x" id="tavX" aria-label="Keluar tavern">×</button></div>
+  <p class="pov-help">Ketuk warga untuk ngobrol · ketuk lantai untuk jalan</p>
+  <a class="btn sm tav-daftar" id="tavDaftar" href="#kartu" onclick="TAVERN.close()" hidden>BIKIN KARTU PETUALANG</a>
+</div>
 <div class="pov" id="pov" role="dialog" aria-modal="true" aria-label="POV kebun sawit" hidden>
   <canvas id="povCanvas" aria-label="Pemandangan kebun sawit dari mata Wali Kota Udin. Geser untuk menoleh, ketuk pohon untuk melihat manfaat sawit."></canvas>
   <div class="pov-top"><span class="pov-tag">POV: UDIN DI KEBUN SAWIT</span><button class="x" id="povX" aria-label="Keluar dari kebun">×</button></div>
@@ -185,6 +191,7 @@
 <script src="fantasy3.js"></script>
 <script src="peta.js"></script>
 <script src="pov.js"></script>
+<script src="tavern.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

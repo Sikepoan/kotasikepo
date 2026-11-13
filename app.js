@@ -89,7 +89,7 @@
   function applyFantasy() { const f = PETA.fantasy && PETA.fantasy(); $('quest').hidden = !f; if (!f) return; if (PETA.setTents && ST.stats && (ST.stats.hari || 0) < 3) PETA.setTents(ST.stats.bangunan || 0); document.body.classList.add('fantasy'); if (!ST.fx) { ST.fx = 1; const fs = document.querySelector('fieldset.kat'); if (fs) fs.hidden = true; const h2 = document.querySelector('#kartu h2'); if (h2) h2.textContent = 'Bikin Kartu Petualang';
       const ld = document.querySelector('#kartu .lead'); if (ld) ld.textContent = 'Isi username, pilih job petualangmu, dan kartumu langsung jadi. Namamu ikut bertualang di peta Kepo Fantasy. Satu orang satu kartu ya.';
       const lb = $('avLbl'); if (lb) lb.textContent = 'PILIH JOB'; const nv = document.querySelector('nav a[href="#kartu"]'); if (nv) nv.textContent = 'Kartu Petualang';
-      $('kirim').textContent = 'BIKIN KARTU PETUALANG'; buildAvs(); preview(); } const tp = $('toPov'); if (tp) tp.hidden = true; const mt = $('mapTip'); if (mt) mt.textContent = 'Geser peta · zoom · klik warga untuk lihat kartu · klik Udin The Goblin untuk disapa';
+      $('kirim').textContent = 'BIKIN KARTU PETUALANG'; buildAvs(); preview(); } const tp = $('toPov'); if (tp) tp.hidden = true; const mt = $('mapTip'); if (mt) mt.textContent = (ST.stats && ST.stats.hari >= 3 ? 'Klik TAVERN untuk masuk · ' : '') + 'Geser peta · zoom · klik warga untuk lihat kartu · klik Udin The Goblin untuk disapa';
     const s = ST.stats || {}, d3 = (s.hari || 0) >= 3; Q.target = d3 ? 150 : 200;
     if (d3) { $('qDay').textContent = 'DAY 3'; $('qJudul').textContent = 'BANGUN BENGKEL'; $('qSub').textContent = 'Blacksmith bantu buat senjata party dungeon';
       if (window.FANT3 && FANT3.tavern() !== 4) { FANT3.setLuas(1); FANT3.setLahan(1); FANT3.setTavern(4); FANT3.onImg(() => PETA.redraw()); PETA.setTents(0); PETA.redraw(); } }
@@ -146,7 +146,7 @@
   // ---------- boot ----------
   (async () => {
     if (DATA.mode === 'demo') { $('demoBar').hidden = false; $('fMode').textContent = 'mode demo'; } else $('fMode').textContent = 'peta live';
-    PETA.init($('map')); PETA.onPick(pick); POV.init(); PETA.onSawit(() => POV.open()); $('toPov').onclick = () => POV.open(); buildAvs(); clock(); setInterval(clock, 20000); setTimeout(clock, 300);
+    PETA.init($('map')); PETA.onPick(pick); POV.init(); PETA.onSawit(() => POV.open()); if (window.TAVERN) { TAVERN.init(); PETA.onTavern(() => TAVERN.open(ST.mine, ST.warga)); } $('toPov').onclick = () => POV.open(); buildAvs(); clock(); setInterval(clock, 20000); setTimeout(clock, 300);
     const bgReady = new Promise(r => { const im = SK.BG.hari2; if (im.complete) r(); else { im.onload = r; im.onerror = r; } });
     try {
       await DATA.init();
