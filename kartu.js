@@ -1,7 +1,7 @@
 // Kota Sikepo — renderer kartu warga (pixel 5x7, sama dengan video)
 (function () {
 const SK_BG = {};
-for (const k of ['hari1', 'hari2']) { const im = new Image(); im.src = 'img/bg_' + k + '.png'; SK_BG[k] = im; }
+for (const k of ['hari1', 'hari2', 'kota']) { const im = new Image(); im.src = 'img/bg_' + k + '.png'; SK_BG[k] = im; }
 // ---------- 5x7 pixel font (same as the videos) ----------
 const F = {
  'A':[14,17,17,31,17,17,17],'B':[30,17,17,30,17,17,30],'C':[14,17,16,16,16,17,14],'D':[30,17,17,17,17,17,30],

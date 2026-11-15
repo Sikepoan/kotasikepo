@@ -8,7 +8,7 @@
   const ST = { av: 'COWOK1', stats: null, warga: [], mine: null }; window.KF_ST = ST;
 
   // ---------- card helpers ----------
-  const cardData = (w, size) => ({ nama: w.nama, no: pad(w.no), kat: w.kat, av: w.av, hari: String(w.hari || (ST.stats && ST.stats.hari) || 1), judul: 'WARGA SIKEPO', bg: 'hari2', size, fantasy: FANT() });
+  const cardData = (w, size) => ({ nama: w.nama, no: pad(w.no), kat: w.kat, av: w.av, hari: String(w.hari || (ST.stats && ST.stats.hari) || 1), judul: 'WARGA SIKEPO', bg: 'kota', size, fantasy: FANT() });
   const FANT = () => !!(window.PETA && PETA.fantasy && PETA.fantasy());
   function drawTo(canvas, d) { const r = SK.render(d); canvas.width = r.small.width; canvas.height = r.small.height; const c = canvas.getContext('2d'); c.imageSmoothingEnabled = false; c.drawImage(r.small, 0, 0); return r; }
   const fname = (w, k) => `kartu_warga_sikepo_${pad(w.no)}_${w.nama.toLowerCase().replace(/[^a-z0-9]+/g, '')}${k ? '_' + k : ''}.png`;
