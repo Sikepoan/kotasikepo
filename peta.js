@@ -11,11 +11,15 @@
   const KOTA_AT = Date.parse('2026-11-12T03:00:00Z');
   // Layout KEPO FANTASY aktif otomatis mulai 12 Nov 2026 18.00 WIB (menggantikan layout kota)
   const FANT_AT = Date.parse('2026-11-12T11:00:00Z');
-  const isFant = () => !!window.FANT3 && (window.SIKEPO_FORCE_FANTASY ?? (Date.now() >= FANT_AT));
-  const isKota = () => !!window.KOTA3 && !isFant() && (window.SIKEPO_FORCE_KOTA ?? (Date.now() >= KOTA_AT));
+  // KOTA SIKEPO (konsep baru, 15 Nov 2026): lahan kosong + papan, warga = yang sudah daftar
+  const SMODE = !window.SIKEPO_OLD;
+  const SIMG = {}; const simg = n => { if (!SIMG[n]) { const i = new Image(); i.src = 'img/' + n + '.png'; SIMG[n] = i; } return SIMG[n]; };
+  const SIGN = { x0: 140, x1: 222, y0: 166 };
+  const isFant = () => !SMODE && !!window.FANT3 && (window.SIKEPO_FORCE_FANTASY ?? (Date.now() >= FANT_AT));
+  const isKota = () => !SMODE && !!window.KOTA3 && !isFant() && (window.SIKEPO_FORCE_KOTA ?? (Date.now() >= KOTA_AT));
   let KMODE = isKota(), FMODE = isFant(), LIGHTS = [];
   const ISL0 = Object.assign({}, ISL), PLOT0 = Object.assign({}, PLOT), HOME0 = Object.assign({}, HOME);
-  function applyLayout() { if (FMODE) { Object.assign(ISL, FANT3.ISL); Object.assign(PLOT, { cx: -999, cy: -999, hw: 1, hh: 1 }); Object.assign(HOME, FANT3.HOME); return; }
+  function applyLayout() { if (SMODE) { Object.assign(ISL, { cx: 180, cy: 144, hw: 112, hh: 50 }); Object.assign(PLOT, { cx: -999, cy: -999, hw: 1, hh: 1 }); Object.assign(HOME, { x: 180, y: 158 }); return; } if (FMODE) { Object.assign(ISL, FANT3.ISL); Object.assign(PLOT, { cx: -999, cy: -999, hw: 1, hh: 1 }); Object.assign(HOME, FANT3.HOME); return; }
     if (KMODE) { Object.assign(ISL, { cx: 180, cy: 150, hw: 172, hh: 88 }); Object.assign(PLOT, KOTA3.PLOT); Object.assign(HOME, { x: 125, y: 98 }); }
     else { Object.assign(ISL, ISL0); Object.assign(PLOT, PLOT0); Object.assign(HOME, HOME0); } }
   applyLayout();
@@ -29,7 +33,8 @@
     if (o.pa != null && nb.length > 1 && Math.random() < 0.7) { const fw = nb.find(([x, y]) => x - a === o.pa && y - b === o.pb); if (fw) pick = fw; }
     o.pa = pick[0] - a; o.pb = pick[1] - b; const [x, y] = KOTA3.tw(pick[0], pick[1]); return { x: x + (o.jx || 0), y: y + (o.jy || 0) };
   }
-  const onLand = (x, y) => FMODE ? FANT3.walk(x, y) : KMODE ? kWalk(x, y) : (inDia(x, y, ISL, 6) && !inDia(x, y, PLOT, -2) && Math.hypot(x - HOME.x, (y - HOME.y) * 2) > 16);
+  const sLand = (x, y) => (((x - 180.5) / 112) ** 2 + ((y - 144) / 50) ** 2 < 1) && !(x > SIGN.x0 && x < SIGN.x1 && y > SIGN.y0);
+  const onLand = (x, y) => SMODE ? sLand(x, y) : FMODE ? FANT3.walk(x, y) : KMODE ? kWalk(x, y) : (inDia(x, y, ISL, 6) && !inDia(x, y, PLOT, -2) && Math.hypot(x - HOME.x, (y - HOME.y) * 2) > 16);
 
   // ---------- static background ----------
   const bg = document.createElement('canvas'); bg.width = WW; bg.height = WH; const g = bg.getContext('2d');
@@ -45,6 +50,7 @@
     [[7, 0], [5, -3], [3, -6], [1, -8]].forEach(([w, dy], i) => R(g, x - w, y - 5 + dy, w * 2, 3, i % 2 ? '#1f6a3a' : '#2a8048'));
   }
   function drawBg() {
+    if (SMODE) { g.clearRect(0, 0, WW, WH); const im = simg('lahan_kota'); if (im.complete && im.naturalWidth) g.drawImage(im, 0, 50, 360, 201); else im.onload = () => { g.clearRect(0, 0, WW, WH); drawBg(); }; LIGHTS = []; return; }
     // sea
     R(g, 0, 0, WW, WH, '#2c86d8');
     for (let y = 0; y < WH; y += 6) for (let x = (y / 6 % 2) * 10; x < WW; x += 20) R(g, x, y, 6, 1, '#3d95e0');
@@ -117,13 +123,14 @@
   function nightK(h) { if (h >= 19 || h < 4.5) return 1; if (h >= 17.5) return (h - 17.5) / 1.5; if (h < 6) return 1 - (h - 4.5) / 1.5; return 0; }
 
   // Wali Kota Udin keliling kota; malam pulang ke tikarnya
-  const landU = (x, y) => FMODE ? FANT3.walk(x, y) : (inDia(x, y, ISL, 6) && !inDia(x, y, PLOT, -2));
+  const landU = (x, y) => SMODE ? sLand(x, y) : FMODE ? FANT3.walk(x, y) : (inDia(x, y, ISL, 6) && !inDia(x, y, PLOT, -2));
   const U = { x: HOME.x + 2, y: HOME.y + 1, tx: HOME.x + 2, ty: HOME.y + 1, wait: 2, moving: false, face: 1, talk: 0, say: '', sayT: 0 };
   const SAPA = ['HALO WARGA! SELAMAT DATANG DI KOTA SIKEPO!', 'SUDAH BIKIN KARTU WARGA BELUM?', 'KOMEN RUMAH YANG WARAS YA!', 'FOLLOW DULU, BIAR JADI WARGA!', '1 LIKE = 1 KOIN. AYO LIKE!', 'COBA KLIK KEBUN SAWIT, SERU LHO!', 'HATI-HATI, INI KOTA PALING KEPO!', 'ENAKAN JAMAN WALIKOTA DULU? SAYA WALIKOTA PERTAMA!'];
   let sapaI = Math.floor(Math.random() * 8);
   function blip() { try { const A = window.__ac || (window.__ac = new (window.AudioContext || window.webkitAudioContext)()); [660, 880, 990].forEach((f, i) => { const o = A.createOscillator(), g = A.createGain(); o.type = 'square'; o.frequency.value = f; g.gain.setValueAtTime(0.05, A.currentTime + i * 0.07); g.gain.exponentialRampToValueAtTime(0.0001, A.currentTime + i * 0.07 + 0.09); o.connect(g).connect(A.destination); o.start(A.currentTime + i * 0.07); o.stop(A.currentTime + i * 0.07 + 0.1); }); } catch (e) {} }
   function sapa() {
     const SF = ['SELAMAT DATANG DI KEPO FANTASY!', 'AKU UDIN THE GOBLIN, KETUA GUILD KALIAN!', 'JANGAN DEKAT-DEKAT GUA ITU...', 'LIKE, KOMEN & SHARE BIAR KITA PUNYA TENDA!', 'BRRR... MALAM DI SINI DINGIN BANGET.', 'MATA MERAH ITU NGELIATIN KITA TERUS...'];
+    if (SMODE) { const SS = ['HALO! SAYA WALI KOTA UDIN.', 'SELAMAT DATANG DI KOTA SIKEPO!', 'KOTANYA MASIH KOSONG MELOMPONG...', 'FOLLOW = KAMU JADI WARGA!', 'KOMEN USULAN BANGUNAN YA!', 'USULAN LIKE TERBANYAK BESOK SAYA BANGUN.', 'BURUNG INI NGGAK DIHITUNG, DIA CUMA NUMPANG.', 'BELUM ADA KANTOR, KANTOR SAYA DI SINI DULU.']; U.say = U.sleep ? 'SSST... UDIN LAGI TIDUR. ZZZ...' : SS[sapaI++ % SS.length]; U.sayT = performance.now() + 4000; if (!U.sleep) { U.wait = 4; U.talk = 4; U.moving = false; } blip(); return; }
     let ln = FMODE ? SF[sapaI++ % SF.length] : SAPA[sapaI++ % SAPA.length]; if (KMODE) ln = ln.includes('KOIN') ? 'SEKARANG BANGUN APA AJA TANPA BUDGET!' : ln.includes('RUMAH YANG WARAS') ? 'KOMEN PEKERJAAN BUAT WARGA YA!' : ln;
     U.say = U.sleep ? 'SSST... UDIN LAGI TIDUR. ZZZ...' : ln; U.sayT = performance.now() + 4000;
     if (!U.sleep) { U.wait = 4; U.talk = 4; U.moving = false; U.face = 1; } blip();
@@ -173,6 +180,10 @@
     const z = cam.z * dpr, [sx, sy] = toScreen(o.x, o.y), s = Math.max(1, Math.round(z));
     if (sx < -20 * s || sy < -30 * s || sx > cv.width + 20 * s || sy > cv.height + 20 * s) return;
     const r = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(sx + x * s), Math.round(sy + y * s), w * s, h * s); };
+    if (SMODE) { const im = simg('w/w' + (Math.abs(o.w.no | 0) % 10)); if (!im.complete || !im.naturalWidth) return; const hh = 16 * z, ww = im.naturalWidth / im.naturalHeight * hh, b = o.moving ? Math.abs(Math.sin(t * 9 + o.ph)) * z * 0.8 : 0;
+      c.fillStyle = 'rgba(0,0,0,0.22)'; c.fillRect(Math.round(sx - ww * 0.3), Math.round(sy - z * 0.5), Math.round(ww * 0.6), Math.max(1, Math.round(z)));
+      c.save(); c.translate(Math.round(sx), 0); if (o.tx < o.x - 0.3) c.scale(-1, 1); c.drawImage(im, Math.round(-ww / 2), Math.round(sy - hh - b), Math.round(ww), Math.round(hh)); c.restore();
+      if (P.sel === o) { c.fillStyle = '#ffd84a'; c.fillRect(Math.round(sx - 2 * z), Math.round(sy - hh - 4 * z), Math.round(4 * z), Math.round(2 * z)); } return; }
     const tk = o.w.kat === 'TUKANG', av = o.w.av || 'MISTERI', skin = SKIN[av] || '#f4b47c', hair = HAIR[av] || '#1c1c24';
     if (o.sleep && KMODE) return;   // tidur di dalam rumah
     if (o.sleep && FMODE) { o.moving = false; const jx = Math.round(Math.sin(t * 40 + o.ph) * 0.6); r(-3 + jx, 0, 7, 1, 'rgba(0,0,0,0.25)'); r(-1 + jx, -10, 3, 3, skin); r(-1 + jx, -11, 3, 1, hair); r(-2 + jx, -7, 5, 4, tk ? '#2a5fc8' : o.col); r(-2 + jx, -3, 2, 3, '#24242e'); r(1 + jx, -3, 2, 3, '#24242e'); if (Math.floor(t * 2 + o.ph) % 3 === 0) r(3, -12, 1, 2, '#8fd8ff'); return; }
@@ -201,6 +212,12 @@
   function drawUdin(c, night, t) {
     const z = cam.z * dpr, [sx, sy] = toScreen(U.x, U.y), s = Math.max(1, Math.round(z));
     const f = U.face, r = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(sx + (f < 0 ? -x - w + 1 : x) * s), Math.round(sy + y * s), w * s, h * s); };
+    if (SMODE) { const nm = U.sleep ? 'w/u_tidur' : U.moving ? 'w/u_j' + (Math.floor(t * 5) % 4) : (U.wait > 0 && U.talk > 0 && Math.floor(t * 3) % 2) ? 'w/u_bicara' : 'w/u_idle', im = simg(nm), bi = simg('w/burung');
+      if (!im.complete || !im.naturalWidth) return; const hh = (U.sleep ? 14 : 19) * z, ww = im.naturalWidth / im.naturalHeight * hh, br = U.moving ? 0 : Math.round(Math.sin(t * 2) * z * 0.3);
+      c.fillStyle = 'rgba(0,0,0,0.22)'; c.fillRect(Math.round(sx - ww * 0.3), Math.round(sy - z * 0.5), Math.round(ww * 0.6), Math.max(1, Math.round(z)));
+      c.drawImage(im, Math.round(sx - ww / 2), Math.round(sy - hh - br), Math.round(ww), Math.round(hh));
+      if (bi.complete && bi.naturalWidth) { const bh = 4.5 * z, bw = bi.naturalWidth / bi.naturalHeight * bh; c.drawImage(bi, Math.round(sx - bw / 2 + (U.sleep ? -2 * z : z * 0.5)), Math.round(sy - hh - br - bh + z * 1.2), Math.round(bw), Math.round(bh)); }
+      return; }
     if (U.sleep) { r(-5, -3, 4, 4, FMODE ? '#7cc85a' : '#f4b47c'); r(-5, -5, 4, 2, '#1c1c24'); r(-1, -3, 8, 3, '#8a4a22'); r(1, -3, 1, 3, '#e02f2f'); return; }
     const b = U.moving ? (Math.floor(t * 7) % 2) : 0, toa = U.wait > 0 && U.talk > 0;
     r(-4, 0, 9, 1, 'rgba(0,0,0,0.25)');
@@ -268,12 +285,15 @@
     const h = window.SIKEPO_FORCE_HOUR ?? wibHour(), night = nightK(h);
     step(dt, night); stepUdin(dt, t, night); stepWx(dt, t);
     cx.setTransform(1, 0, 0, 1, 0, 0); cx.imageSmoothingEnabled = false;
-    cx.fillStyle = FMODE ? '#1a2e24' : '#2c86d8'; cx.fillRect(0, 0, cv.width, cv.height);
+    cx.fillStyle = SMODE ? '#2b4a26' : FMODE ? '#1a2e24' : '#2c86d8'; cx.fillRect(0, 0, cv.width, cv.height);
     const z = cam.z * dpr; const [ox, oy] = toScreen(0, 0);
     cx.drawImage(bg, Math.round(ox), Math.round(oy), Math.round(WW * z), Math.round(WH * z));
     // sea shimmer
     cx.fillStyle = 'rgba(255,255,255,0.35)';
-    if (!FMODE) for (let i = 0; i < 18; i++) { const x = (rnd(i) * WW + t * (3 + i % 4)) % WW, y = rnd(i * 7) * WH; if (inDia(x, y, ISL, -6)) continue; const [a, b2] = toScreen(x, y); cx.fillRect(Math.round(a), Math.round(b2), Math.round(5 * z), Math.max(1, Math.round(z))); }
+    if (SMODE) { const nEl = document.getElementById('hWarga'), txt = 'WARGA: ' + ((nEl && nEl.textContent.trim() && nEl.textContent.trim() !== '—') ? nEl.textContent.trim() : '0'), sc = Math.max(1, Math.floor(56 * z / Math.max(1, SK.tw(txt, 1)))), w = SK.tw(txt, sc), [a, b2] = toScreen(180.5, 199);
+      if (window.SK) { cx.fillStyle = '#3a2210'; cx.fillRect(Math.round(a - w / 2 - sc), Math.round(b2 - sc), w + 2 * sc, 9 * sc); SK.txt(cx, txt, Math.round(a - w / 2), Math.round(b2), sc, '#ffd84a', null);
+        const t2 = 'KOTA SIKEPO', s2 = Math.max(1, Math.floor(62 * z / Math.max(1, SK.tw(t2, 1)))), w2 = SK.tw(t2, s2), [a2, b3] = toScreen(180.5, 186); SK.txt(cx, t2, Math.round(a2 - w2 / 2), Math.round(b3), s2, '#fff3cf', null); } }
+    if (!FMODE && !SMODE) for (let i = 0; i < 18; i++) { const x = (rnd(i) * WW + t * (3 + i % 4)) % WW, y = rnd(i * 7) * WH; if (inDia(x, y, ISL, -6)) continue; const [a, b2] = toScreen(x, y); cx.fillRect(Math.round(a), Math.round(b2), Math.round(5 * z), Math.max(1, Math.round(z))); }
     // sprites sorted by y
     const list = P.walkers.slice().sort((a, b) => a.y - b.y);
     let udDrawn = false;
@@ -301,11 +321,11 @@
           gr.addColorStop(0, `rgba(255,220,120,${(0.55 * night).toFixed(2)})`); gr.addColorStop(1, 'rgba(255,200,80,0)'); cx.fillStyle = gr; cx.fillRect(a - rr, b2 - rr, rr * 2, rr * 2); }
         cx.restore(); for (const [x, y, r] of LIGHTS) { const [a, b2] = toScreen(x, y), q = Math.max(1, Math.round(zz * (r > 4 ? 1.5 : 1))); cx.fillStyle = `rgba(255,242,176,${night.toFixed(2)})`; cx.fillRect(Math.round(a - q / 2), Math.round(b2 - q / 2), q, q); } }
       if (FMODE) for (const [ex, ey] of FANT3.EYES) { const [a, b2] = toScreen(ex, ey), rr = 14 * cam.z * dpr; const gr = cx.createRadialGradient(a, b2, 0, a, b2, rr); gr.addColorStop(0, `rgba(255,40,30,${(0.85 * night).toFixed(2)})`); gr.addColorStop(1, 'rgba(255,40,30,0)'); cx.fillStyle = gr; cx.fillRect(a - rr, b2 - rr, rr * 2, rr * 2); }
-      if (night > 0.6 && !FMODE) for (const o of list) if (o.sleep && (Math.floor(t + o.ph) % 3 === 0)) { const [a, b2] = toScreen(o.x + 2, o.y - 5 - (t * 3 + o.ph) % 4); SK.txt(cx, 'Z', Math.round(a), Math.round(b2), Math.max(1, Math.round(dpr)), '#c9d2ea', null); }
+      if (night > 0.6 && !FMODE && !SMODE) for (const o of list) if (o.sleep && (Math.floor(t + o.ph) % 3 === 0)) { const [a, b2] = toScreen(o.x + 2, o.y - 5 - (t * 3 + o.ph) % 4); SK.txt(cx, 'Z', Math.round(a), Math.round(b2), Math.max(1, Math.round(dpr)), '#c9d2ea', null); }
     }
     drawWeatherFront(t);
     // hint above the plantation
-    if (!FMODE) { const [a, b2] = toScreen(PLOT.cx, PLOT.cy - PLOT.hh - 14), sc = Math.max(1, Math.round(dpr * (cam.z >= 3 ? 2 : 1))), s = 'KLIK KEBUN: POV', w = SK.tw(s, sc), bob = Math.round(Math.sin(t * 3) * 2 * dpr);
+    if (!FMODE && !SMODE) { const [a, b2] = toScreen(PLOT.cx, PLOT.cy - PLOT.hh - 14), sc = Math.max(1, Math.round(dpr * (cam.z >= 3 ? 2 : 1))), s = 'KLIK KEBUN: POV', w = SK.tw(s, sc), bob = Math.round(Math.sin(t * 3) * 2 * dpr);
       cx.fillStyle = 'rgba(28,28,36,0.85)'; cx.fillRect(Math.round(a - w / 2 - 4 * sc), Math.round(b2 - 3 * sc + bob), w + 8 * sc, 13 * sc); SK.txt(cx, s, Math.round(a - w / 2), Math.round(b2 + bob), sc, '#ffd84a', null); }
     // labels
     const strong = new Set([P.sel, ...[...P.hl].map(n => P.byNo.get(n))].filter(Boolean));

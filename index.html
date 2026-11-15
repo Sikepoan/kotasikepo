@@ -88,9 +88,9 @@
 
         <div id="perluLogin" class="panel login-box" hidden>
           <h3>Masuk dulu ya!</h3>
-          <p>Untuk bikin Kartu Petualang &amp; ikut fitur guild, masuk pakai akun Google.</p>
+          <p>Untuk bikin Kartu Warga &amp; ikut fitur kota, masuk pakai akun Google.</p>
           <button class="btn google" id="btnGoogle2" type="button">MASUK DENGAN GOOGLE</button>
-          <p class="hint">Email hanya dipakai untuk login &amp; data guild, tidak ditampilkan ke publik dan tidak dibagikan.</p>
+          <p class="hint">Email hanya dipakai untuk login &amp; data kota, tidak ditampilkan ke publik dan tidak dibagikan.</p>
         </div>
         <form id="daftar" class="panel form" novalidate>
           <label for="nama">USERNAME / NAMA
@@ -163,28 +163,28 @@
 
 <div class="ui" id="ui">
   <div class="ui-top">
-    <div class="ui-search px"><span class="ui-logo">KF</span><div id="ui-cari-slot"></div><span class="ui-clock-s" id="uiClockS">--:--</span></div>
-    <div class="ui-siaran px" id="uiSiaran" hidden><span class="ui-tag">SIARAN</span><button class="ui-siaran-t" id="uiSiaranT" type="button"><b id="uiSiaranJ"></b><small>Pengumuman Guild · ketuk untuk baca</small></button><button class="ui-x" id="uiSiaranX" aria-label="Tutup siaran">×</button></div>
+    <div class="ui-search px"><span class="ui-logo">KS</span><div id="ui-cari-slot"></div><span class="ui-clock-s" id="uiClockS">--:--</span></div>
+    <div class="ui-siaran px" id="uiSiaran" hidden><span class="ui-tag">SIARAN</span><button class="ui-siaran-t" id="uiSiaranT" type="button"><b id="uiSiaranJ"></b><small>Pengumuman Kota · ketuk untuk baca</small></button><button class="ui-x" id="uiSiaranX" aria-label="Tutup siaran">×</button></div>
   </div>
   <div class="ui-clock px" id="uiClock"><b id="uiJam">--:--</b> WIB<small id="uiFase">—</small></div>
-  <div class="ui-count px" id="uiCount"><b id="uiWarga">—</b> petualang<i class="ui-bar"></i><small><span class="dot"></span> <span id="uiKartu">—</span> punya kartu</small></div>
+  <div class="ui-count px" id="uiCount"><b id="uiWarga">—</b> warga<i class="ui-bar"></i><small><span class="dot"></span> <span id="uiKartu">—</span> punya kartu</small></div>
   <div class="ui-pins" id="uiPins"></div>
   <nav class="ui-nav" id="uiNav" aria-label="Menu utama">
     <button data-v="peta" aria-current="page"><i class="ic ic-peta"></i>PETA</button>
-    <button data-v="tavern"><i class="ic ic-tavern"></i>TAVERN</button>
+    <button data-v="tavern" hidden style="display:none"><i class="ic ic-tavern"></i>TAVERN</button>
     <button data-v="kartu" class="mid"><i class="ic ic-kartu"></i>KARTU</button>
-    <button data-v="guild"><i class="ic ic-guild"></i>GUILD</button>
+    <button data-v="guild" hidden style="display:none"><i class="ic ic-guild"></i>GUILD</button>
     <button data-v="kabar"><i class="ic ic-kabar"></i>KABAR</button>
   </nav>
 </div>
 <section class="sheet px" id="sheetGuild" hidden><div class="sheet-h"><b>GUILD KEPO FANTASY</b><button class="ui-x" data-close>×</button></div><div class="sheet-b" id="guildB"></div></section>
 <section class="sheet px" id="sheetKabar" hidden><div class="sheet-h"><b>KABAR DESA</b><button class="ui-x" data-close>×</button></div><div class="sheet-b" id="kabarB"></div></section>
-<section class="sheet px" id="sheetSiaran" hidden><div class="sheet-h"><b>SIARAN GUILD</b><button class="ui-x" data-close>×</button></div><div class="sheet-b" id="siaranB"></div></section>
+<section class="sheet px" id="sheetSiaran" hidden><div class="sheet-h"><b>SIARAN KOTA</b><button class="ui-x" data-close>×</button></div><div class="sheet-b" id="siaranB"></div></section>
 <div class="onb" id="onb" role="dialog" aria-modal="true" aria-labelledby="onbJudul" hidden>
   <div class="onb-card">
     <div class="onb-tag">KEPO FANTASY</div>
     <div id="onb1">
-      <h2 id="onbJudul">Selamat datang, Petualang!</h2>
+      <h2 id="onbJudul">Selamat datang di Kota Sikepo!</h2>
       <p>Masuk ke dunia Kepo Fantasy pakai username Instagram / TikTok kamu.</p>
       <form id="onbForm1"><label class="onb-in"><span>@</span><input id="onbNama" autocomplete="off" autocapitalize="off" maxlength="24" placeholder="username" required></label>
       <button class="btn onb-go" type="submit">LANJUT</button></form>

@@ -20,7 +20,7 @@
   document.querySelectorAll('.ic').forEach(i => { const k = [...i.classList].find(c => c.startsWith('ic-')).slice(3); if (ICON[k]) i.style.backgroundImage = ICON[k]; });
 
   // ---------- bar cari, jam, siaran, penghitung ----------
-  const slot = $('ui-cari-slot'), cari = $('cari'); if (slot && cari) { slot.append(cari); const q = $('q'); if (q) q.placeholder = 'Cari petualang, job, tempat…'; }
+  const slot = $('ui-cari-slot'), cari = $('cari'); if (slot && cari) { slot.append(cari); const q = $('q'); if (q) q.placeholder = 'Cari warga…'; }
   function tick() {
     const ck = $('clock'), fs = $('fase'); if (ck) { $('uiJam').textContent = ck.textContent; $('uiClockS').textContent = ck.textContent; } if (fs) $('uiFase').textContent = fs.textContent;
     const st = ST(), s = st.stats || {}; $('uiWarga').textContent = ($('hWarga') || {}).textContent || '—'; $('uiKartu').textContent = fmt((st.warga || []).length);
@@ -51,9 +51,7 @@
     SK.JOBS.forEach(j => { const row = document.createElement('div'); row.className = 'g-row'; const c = document.createElement('canvas'); c.width = 24; c.height = 28; c.getContext('2d').drawImage(SK.JSPR[j.id], 0, 0);
       const t = document.createElement('div'); const n = document.createElement('b'); n.textContent = j.label + ' · ' + by[j.id].length; const s = document.createElement('small'); s.textContent = by[j.id].slice(-6).reverse().map(x => x.nama).join(', ') || 'Belum ada. Jadilah yang pertama!'; t.append(n, s); row.append(c, t); b.append(row); }); }
   const KABAR = [
-    ['DAY 3', 'Tavern jadi! Makanan menipis', 'Cahaya memperluas tanah. Udin butuh 10 petualang ke Dungeon Lantai 1, warga bangun bengkel (150 poin).'],
-    ['DAY 2', 'Penduduk bertambah, bangun Tavern', 'Tenda berdiri, warga sibuk menebang pohon, ngobrol, dan mancing. Misi: Tavern Guild 200 poin.'],
-    ['DAY 1', 'Tersedot ke Kepo Fantasy', 'Meteor menghantam Kota Sikepo. Warga yang selamat terbangun di dunia lain, ketua guild: Udin The Goblin.']
+    ['DAY 1', 'Kota Sikepo dibuka! Warganya masih kosong', 'Wali Kota Udin membuka Kota Sikepo, kota yang isinya diatur netizen. Follow = jadi warga. Komen usulan bangunan, yang like-nya terbanyak besok dibangun!']
   ];
   function kabar() { const b = $('kabarB'); b.innerHTML = ''; KABAR.forEach(([d, j, s]) => { const a = document.createElement('article'); a.className = 'k-item'; const t = document.createElement('span'); t.className = 'ui-tag'; t.textContent = d; const h = document.createElement('b'); h.textContent = j; const p = document.createElement('p'); p.textContent = s; a.append(t, h, p); b.append(a); });
     const r = $('rules'); if (r) b.append(r); const so = $('sosmed'); if (so) { const w = document.createElement('div'); w.className = 'k-sos'; w.append(so); b.append(w); } }
@@ -74,12 +72,12 @@
   // ---------- chat tavern (syarat: punya Kartu Petualang) ----------
   let chatOn = false;
   async function chatLoad() { if (!window.DATA || !DATA.chatList) return; let L = []; try { L = await DATA.chatList(); } catch (e) { $('chatList').textContent = 'Obrolan belum bisa dimuat.'; return; }
-    const box = $('chatList'); box.innerHTML = ''; if (!L.length) { const p = document.createElement('p'); p.className = 'chat-empty'; p.textContent = 'Belum ada obrolan. Sapa petualang lain!'; box.append(p); }
+    const box = $('chatList'); box.innerHTML = ''; if (!L.length) { const p = document.createElement('p'); p.className = 'chat-empty'; p.textContent = 'Belum ada obrolan. Sapa warga lain!'; box.append(p); }
     L.forEach(m => { const d = document.createElement('div'); d.className = 'chat-m'; const n = document.createElement('b'); n.textContent = m.nama || 'WARGA'; const t = document.createElement('span'); t.textContent = m.isi; d.append(n, t); box.append(d); });
     box.scrollTop = box.scrollHeight; $('chatN').textContent = L.length ? '(' + L.length + ')' : '';
     const last = L[L.length - 1]; if (last && window.TAVERN && TAVERN.bubble) TAVERN.bubble(last.no, last.isi); }
   function chatInit() { const mine = ST().mine; $('chatLock').hidden = !!mine; $('chatF').hidden = !mine;
-    $('chatLock').querySelector('p').textContent = 'Mau chat dengan player lain? Bikin Kartu Petualang dulu, gratis!'; const bt = $('chatLogin'); bt.disabled = false; bt.textContent = 'BIKIN KARTU PETUALANG';
+    $('chatLock').querySelector('p').textContent = 'Mau chat dengan player lain? Bikin Kartu Warga dulu, gratis!'; const bt = $('chatLogin'); bt.disabled = false; bt.textContent = 'BIKIN KARTU WARGA';
     bt.onclick = () => { if (window.TAVERN) TAVERN.close(); open('kartu'); };
     if (!chatOn) { chatOn = true; DATA.onChat && DATA.onChat(chatLoad); } chatLoad(); }
   $('chatH').onclick = () => { $('chatB').hidden = !$('chatB').hidden; };
