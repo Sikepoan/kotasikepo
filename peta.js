@@ -19,7 +19,7 @@
   const isKota = () => !SMODE && !!window.KOTA3 && !isFant() && (window.SIKEPO_FORCE_KOTA ?? (Date.now() >= KOTA_AT));
   let KMODE = isKota(), FMODE = isFant(), LIGHTS = [];
   const ISL0 = Object.assign({}, ISL), PLOT0 = Object.assign({}, PLOT), HOME0 = Object.assign({}, HOME);
-  function applyLayout() { if (SMODE) { Object.assign(ISL, { cx: 180, cy: 144, hw: 112, hh: 50 }); Object.assign(PLOT, { cx: -999, cy: -999, hw: 1, hh: 1 }); Object.assign(HOME, { x: 180, y: 158 }); return; } if (FMODE) { Object.assign(ISL, FANT3.ISL); Object.assign(PLOT, { cx: -999, cy: -999, hw: 1, hh: 1 }); Object.assign(HOME, FANT3.HOME); return; }
+  function applyLayout() { if (SMODE) { Object.assign(ISL, { cx: 180, cy: 136, hw: 160, hh: 72 }); Object.assign(PLOT, { cx: -999, cy: -999, hw: 1, hh: 1 }); Object.assign(HOME, { x: 174, y: 176 }); return; } if (FMODE) { Object.assign(ISL, FANT3.ISL); Object.assign(PLOT, { cx: -999, cy: -999, hw: 1, hh: 1 }); Object.assign(HOME, FANT3.HOME); return; }
     if (KMODE) { Object.assign(ISL, { cx: 180, cy: 150, hw: 172, hh: 88 }); Object.assign(PLOT, KOTA3.PLOT); Object.assign(HOME, { x: 125, y: 98 }); }
     else { Object.assign(ISL, ISL0); Object.assign(PLOT, PLOT0); Object.assign(HOME, HOME0); } }
   applyLayout();
@@ -33,7 +33,7 @@
     if (o.pa != null && nb.length > 1 && Math.random() < 0.7) { const fw = nb.find(([x, y]) => x - a === o.pa && y - b === o.pb); if (fw) pick = fw; }
     o.pa = pick[0] - a; o.pb = pick[1] - b; const [x, y] = KOTA3.tw(pick[0], pick[1]); return { x: x + (o.jx || 0), y: y + (o.jy || 0) };
   }
-  const sLand = (x, y) => (((x - 180.5) / 112) ** 2 + ((y - 144) / 50) ** 2 < 1) && !(x > SIGN.x0 && x < SIGN.x1 && y > SIGN.y0);
+  const sLand = (x, y) => x > 12 && x < 348 && y > 60 && y < 212 && !(x > 112 && x < 240 && y > 180);
   const onLand = (x, y) => SMODE ? sLand(x, y) : FMODE ? FANT3.walk(x, y) : KMODE ? kWalk(x, y) : (inDia(x, y, ISL, 6) && !inDia(x, y, PLOT, -2) && Math.hypot(x - HOME.x, (y - HOME.y) * 2) > 16);
 
   // ---------- static background ----------
@@ -113,7 +113,7 @@
 
   // ---------- canvas / camera ----------
   let cv, cx, cam = { x: ISL.cx, y: ISL.cy, z: 3 }, dpr = 1, last = 0;
-  const SB = { x0: 0, x1: 360, y0: 50, y1: 251 };   // batas gambar lahan (SMODE): layar selalu penuh lahan
+  const SB = { x0: 0, x1: 360, y0: 50, y1: 252.5 };   // batas gambar lahan (SMODE): layar selalu penuh lahan
   const zMin = () => SMODE ? Math.max(cv.width / dpr / (SB.x1 - SB.x0), cv.height / dpr / (SB.y1 - SB.y0)) * 1.001 : Math.max(1.5, Math.min(cv.width / dpr / WW, cv.height / dpr / WH) * 0.95), zMax = 9;
   function clampCam() { cam.z = Math.max(zMin(), Math.min(zMax, cam.z));
     if (SMODE) { const hw = cv.width / dpr / cam.z / 2, hh = cv.height / dpr / cam.z / 2; cam.x = Math.max(SB.x0 + hw, Math.min(SB.x1 - hw, cam.x)); cam.y = Math.max(SB.y0 + hh, Math.min(SB.y1 - hh, cam.y)); return; }
@@ -290,12 +290,12 @@
     cx.setTransform(1, 0, 0, 1, 0, 0); cx.imageSmoothingEnabled = false;
     cx.fillStyle = SMODE ? '#2b4a26' : FMODE ? '#1a2e24' : '#2c86d8'; cx.fillRect(0, 0, cv.width, cv.height);
     const z = cam.z * dpr; const [ox, oy] = toScreen(0, 0);
-    cx.drawImage(bg, Math.round(ox), Math.round(oy), Math.round(WW * z), Math.round(WH * z));
+    if (SMODE) { const L3 = window.__L3 || (window.__L3 = Object.assign(new Image(), { src: 'img/lahan3d.jpg' })); if (L3.complete && L3.naturalWidth) { cx.imageSmoothingEnabled = true; const [a0, b0] = toScreen(0, 50); cx.drawImage(L3, Math.round(a0), Math.round(b0), Math.round(360 * z), Math.round(202.5 * z)); cx.imageSmoothingEnabled = false; } }
+    else cx.drawImage(bg, Math.round(ox), Math.round(oy), Math.round(WW * z), Math.round(WH * z));
     // sea shimmer
     cx.fillStyle = 'rgba(255,255,255,0.35)';
-    if (SMODE) { const nEl = document.getElementById('hWarga'), txt = 'WARGA: ' + ((nEl && nEl.textContent.trim() && nEl.textContent.trim() !== '—') ? nEl.textContent.trim() : '0'), sc = Math.max(1, Math.floor(56 * z / Math.max(1, SK.tw(txt, 1)))), w = SK.tw(txt, sc), [a, b2] = toScreen(180.5, 199);
-      if (window.SK) { cx.fillStyle = '#3a2210'; cx.fillRect(Math.round(a - w / 2 - sc), Math.round(b2 - sc), w + 2 * sc, 9 * sc); SK.txt(cx, txt, Math.round(a - w / 2), Math.round(b2), sc, '#ffd84a', null);
-        const t2 = 'KOTA SIKEPO', s2 = Math.max(1, Math.floor(62 * z / Math.max(1, SK.tw(t2, 1)))), w2 = SK.tw(t2, s2), [a2, b3] = toScreen(180.5, 186); SK.txt(cx, t2, Math.round(a2 - w2 / 2), Math.round(b3), s2, '#fff3cf', null); } }
+    if (SMODE && window.SK) { const nEl = document.getElementById('hWarga'), v = nEl && nEl.textContent.trim(), txt = 'WARGA: ' + (v && v !== '—' ? v : '0'), sc = Math.max(1, Math.round(z / 2.2)), w = SK.tw(txt, sc), [a, b2] = toScreen(174.4, 222);
+      cx.fillStyle = '#1c1c24'; cx.fillRect(Math.round(a - w / 2 - 5 * sc), Math.round(b2 - 3 * sc), w + 10 * sc, 13 * sc); cx.fillStyle = '#7a4a22'; cx.fillRect(Math.round(a - w / 2 - 4 * sc), Math.round(b2 - 2 * sc), w + 8 * sc, 11 * sc); SK.txt(cx, txt, Math.round(a - w / 2), Math.round(b2), sc, '#ffd84a', null); }
     if (!FMODE && !SMODE) for (let i = 0; i < 18; i++) { const x = (rnd(i) * WW + t * (3 + i % 4)) % WW, y = rnd(i * 7) * WH; if (inDia(x, y, ISL, -6)) continue; const [a, b2] = toScreen(x, y); cx.fillRect(Math.round(a), Math.round(b2), Math.round(5 * z), Math.max(1, Math.round(z))); }
     // sprites sorted by y
     const list = P.walkers.slice().sort((a, b) => a.y - b.y);
