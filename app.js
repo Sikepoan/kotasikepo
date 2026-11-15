@@ -57,12 +57,12 @@
 
   // ---------- stats ----------
   function renderStats() {
-    const s0 = ST.stats || {}, YT_LAMA = 4007;   // Kepo Fantasy: subscriber YouTube lama (gugur kena meteor) tidak dihitung
-    const s = FANT() ? Object.assign({}, s0, { youtube: Math.max(0, (s0.youtube || 0) - YT_LAMA) }) : s0, total = (s.ig || 0) + (s.tiktok || 0) + (s.youtube || 0);
+    const s0 = ST.stats || {}, YT_LAMA = 4070;   // Kota Sikepo restart 15 Nov 2026: subscriber YouTube lama (4.070) tidak dihitung
+    const s = Object.assign({}, s0, { youtube: Math.max(0, (s0.youtube || 0) - YT_LAMA) }), total = (s.ig || 0) + (s.tiktok || 0) + (s.youtube || 0);
     if (FANT()) { const st = document.querySelector('#sTotal + .s'); if (st) st.textContent = 'warga yang selamat'; const k = document.querySelector('#sTotal') && document.querySelector('#sTotal').previousElementSibling; if (k) k.textContent = 'WARGA HIDUP'; }
     $('hWarga').textContent = fmt(total); $('hBangunan').textContent = fmt(s.bangunan); $('hKoin').textContent = fmt(s.koin);
     $('sTotal').textContent = fmt(total); $('sKartu').textContent = fmt(ST.warga.length); $('sKoin').textContent = fmt(s.koin); $('sBangunan').textContent = fmt(s.bangunan); $('sHari').textContent = s.hari || '—';
-    const rows = [['INSTAGRAM', s.ig, '#f07aa8'], ['TIKTOK', s.tiktok, '#2aa89a'], [FANT() ? 'YOUTUBE (BARU)' : 'YOUTUBE', s.youtube, '#e02f2f']];
+    const rows = [['INSTAGRAM', s.ig, '#f07aa8'], ['TIKTOK', s.tiktok, '#2aa89a'], ['YOUTUBE (BARU)', s.youtube, '#e02f2f']];
     const mx = Math.max(1, ...rows.map(r => r[1] || 0));
     $('bars').innerHTML = '';
     rows.forEach(([k, v, col]) => {
