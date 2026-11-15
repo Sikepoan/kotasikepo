@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="app">
 <div id="demoBar" class="demo" hidden>MODE DEMO: belum tersambung database, data contoh tersimpan di browser ini saja.</div>
 
 <header class="top">
@@ -161,10 +161,52 @@
   </section>
 </main>
 
+<div class="ui" id="ui">
+  <div class="ui-top">
+    <div class="ui-search px"><span class="ui-logo">KF</span><div id="ui-cari-slot"></div><span class="ui-clock-s" id="uiClockS">--:--</span></div>
+    <div class="ui-siaran px" id="uiSiaran" hidden><span class="ui-tag">SIARAN</span><button class="ui-siaran-t" id="uiSiaranT" type="button"><b id="uiSiaranJ"></b><small>Pengumuman Guild · ketuk untuk baca</small></button><button class="ui-x" id="uiSiaranX" aria-label="Tutup siaran">×</button></div>
+  </div>
+  <div class="ui-clock px" id="uiClock"><b id="uiJam">--:--</b> WIB<small id="uiFase">—</small></div>
+  <div class="ui-count px" id="uiCount"><b id="uiWarga">—</b> petualang<i class="ui-bar"></i><small><span class="dot"></span> <span id="uiKartu">—</span> punya kartu</small></div>
+  <div class="ui-pins" id="uiPins"></div>
+  <nav class="ui-nav" id="uiNav" aria-label="Menu utama">
+    <button data-v="peta" aria-current="page"><i class="ic ic-peta"></i>PETA</button>
+    <button data-v="tavern"><i class="ic ic-tavern"></i>TAVERN</button>
+    <button data-v="kartu" class="mid"><i class="ic ic-kartu"></i>KARTU</button>
+    <button data-v="guild"><i class="ic ic-guild"></i>GUILD</button>
+    <button data-v="kabar"><i class="ic ic-kabar"></i>KABAR</button>
+  </nav>
+</div>
+<section class="sheet px" id="sheetGuild" hidden><div class="sheet-h"><b>GUILD KEPO FANTASY</b><button class="ui-x" data-close>×</button></div><div class="sheet-b" id="guildB"></div></section>
+<section class="sheet px" id="sheetKabar" hidden><div class="sheet-h"><b>KABAR DESA</b><button class="ui-x" data-close>×</button></div><div class="sheet-b" id="kabarB"></div></section>
+<section class="sheet px" id="sheetSiaran" hidden><div class="sheet-h"><b>SIARAN GUILD</b><button class="ui-x" data-close>×</button></div><div class="sheet-b" id="siaranB"></div></section>
+<div class="onb" id="onb" role="dialog" aria-modal="true" aria-labelledby="onbJudul" hidden>
+  <div class="onb-card">
+    <div class="onb-tag">KEPO FANTASY</div>
+    <div id="onb1">
+      <h2 id="onbJudul">Selamat datang, Petualang!</h2>
+      <p>Masuk ke dunia Kepo Fantasy pakai username Instagram / TikTok kamu.</p>
+      <form id="onbForm1"><label class="onb-in"><span>@</span><input id="onbNama" autocomplete="off" autocapitalize="off" maxlength="24" placeholder="username" required></label>
+      <button class="btn onb-go" type="submit">LANJUT</button></form>
+    </div>
+    <div id="onb2" hidden>
+      <h2>Pilih job kamu</h2>
+      <div class="onb-jobs" id="onbJobs"></div>
+      <button class="btn onb-go red" id="onbMasuk" type="button">MASUK KE DESA</button>
+      <button class="onb-link" id="onbBack" type="button">← ganti username</button>
+    </div>
+    <p class="onb-err" id="onbErr" role="alert"></p>
+    <button class="onb-link" id="onbSkip" type="button">Lihat-lihat dulu</button>
+  </div>
+</div>
 <div class="pov tav" id="tav" role="dialog" aria-modal="true" aria-label="Di dalam Tavern Guild" hidden>
   <canvas id="tavCanvas" aria-label="Interior Tavern Guild. Ketuk warga, bartender, atau Udin untuk ngobrol."></canvas>
   <div class="pov-top"><span class="pov-tag">TAVERN GUILD KEPO</span><button class="x" id="tavX" aria-label="Keluar tavern">×</button></div>
   <p class="pov-help">Ketuk warga untuk ngobrol · ketuk lantai untuk jalan</p>
+  <div class="chat px" id="chat"><button class="chat-h" id="chatH" type="button">OBROLAN TAVERN <span id="chatN"></span></button>
+    <div class="chat-b" id="chatB" hidden><div class="chat-list" id="chatList"></div>
+      <div class="chat-lock" id="chatLock"><p>Kalau mau chat dengan player lain, kamu bisa login.</p><button class="btn sm" id="chatLogin" type="button">MASUK UNTUK CHAT</button></div>
+      <form class="chat-f" id="chatF" hidden><input id="chatIn" maxlength="120" placeholder="Tulis pesan…" autocomplete="off"><button class="btn sm" type="submit">KIRIM</button></form></div></div>
   <a class="btn sm tav-daftar" id="tavDaftar" href="#kartu" onclick="TAVERN.close()" hidden>BIKIN KARTU PETUALANG</a>
 </div>
 <div class="pov" id="pov" role="dialog" aria-modal="true" aria-label="POV kebun sawit" hidden>
@@ -192,6 +234,8 @@
 <script src="peta.js"></script>
 <script src="pov.js"></script>
 <script src="tavern.js"></script>
+<script src="onboard.js"></script>
+<script src="app2.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

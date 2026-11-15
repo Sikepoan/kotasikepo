@@ -57,6 +57,7 @@
       const hb = document.getElementById('tavDaftar'); if (hb) hb.hidden = !!mine;
       el.hidden = false; document.body.style.overflow = 'hidden'; fit(); on = true; last = performance.now(); cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); },
     people: () => P,
+    bubble(no, isi) { if (!on) return; const o = P.find(x => x.w && x.w.no === no) || (me && me.w && me.w.no === no ? me : null); if (o) say = { o, text: String(isi).slice(0, 60).replace(/(.{1,22})(\s|$)/g, '$1|').replace(/\|+$/, '').toUpperCase(), until: performance.now() / 1000 + 5 }; },
     close() { on = false; cancelAnimationFrame(raf); if (el) el.hidden = true; document.body.style.overflow = ''; }
   };
 })();

@@ -352,6 +352,8 @@
     onPick(f) { P.onPick = f; },
     onSawit(f) { P.onSawit = f; },
     onTavern(f) { P.onTavern = f; },
+    screenOf(x, y) { if (!cv) return [0, 0]; const [a, b] = toScreen(x, y); return [a / dpr, b / dpr]; },
+    resize() { resize(); },
     udinScreen() { const [x, y] = toScreen(U.x, U.y - 7); return [x / dpr, y / dpr]; },
     isNight() { return nightK(window.SIKEPO_FORCE_HOUR ?? wibHour()) > 0.6; },
     cuaca: () => WX.name,

@@ -17,7 +17,7 @@
   });
   function demo() { try { return JSON.parse(localStorage.getItem(DEMO_KEY)) || demoSeed(); } catch (e) { return demoSeed(); } }
   function demoSave(d) { try { localStorage.setItem(DEMO_KEY, JSON.stringify(d)); } catch (e) {} }
-  const listeners = [];
+  const listeners = [], chatL = [], demoChat = [];
 
   const API = {
     mode: live ? 'live' : 'demo',
@@ -29,6 +29,7 @@
       sb.auth.onAuthStateChange((ev, s) => { user = s ? s.user : null; uid = user ? user.id : null; authL.forEach(f => f(API.akun())); });
       sb.channel('warga-baru').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'warga' },
         p => listeners.forEach(f => f(p.new))).subscribe();
+      sb.channel('chat-tavern').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat' }, () => chatL.forEach(f => f())).subscribe();
     },
     async listWarga() {
       if (!live) return demo().warga;
@@ -74,6 +75,19 @@
       return data;
     },
     onNew(f) { listeners.push(f); },
+    // ---- obrolan tavern (syarat: punya kartu) ----
+    async chatList() {
+      if (!live) return demoChat.slice(-40);
+      const { data, error } = await sb.from('chat').select('id,no,nama,av,isi,created_at').order('created_at', { ascending: false }).limit(40);
+      if (error) throw error; return (data || []).reverse();
+    },
+    async chatSend(isi, mine) {
+      isi = (isi || '').trim().slice(0, 120); if (!isi) return;
+      if (!live) { if (!mine) throw { kode: 'perlu_kartu' }; demoChat.push({ id: Date.now(), no: mine.no, nama: mine.nama, av: mine.av, isi, created_at: new Date().toISOString() }); chatL.forEach(f => f()); return; }
+      const { error } = await sb.from('chat').insert({ isi });
+      if (error) throw { kode: /terlalu_cepat/.test(error.message) ? 'terlalu_cepat' : error.code === '42501' ? 'perlu_kartu' : 'gagal', pesan: error.message };
+    },
+    onChat(f) { chatL.push(f); },
     // ---- akun Google ----
     akun() { if (!user || user.is_anonymous || !user.email) return null; const m = user.user_metadata || {}; return { email: user.email, nama: m.full_name || m.name || user.email.split('@')[0], foto: m.avatar_url || m.picture || '' }; },
     onAuth(f) { authL.push(f); },

@@ -5,7 +5,7 @@
   const pad = n => String(n).padStart(4, '0');
   const fmt = n => Number(n || 0).toLocaleString('id-ID');
   const cleanNama = s => (s || '').toUpperCase().replace(/[^A-Z0-9_.@ ]/g, '').replace(/\s+/g, ' ').trim().slice(0, 24);
-  const ST = { av: 'COWOK1', stats: null, warga: [], mine: null };
+  const ST = { av: 'COWOK1', stats: null, warga: [], mine: null }; window.KF_ST = ST;
 
   // ---------- card helpers ----------
   const cardData = (w, size) => ({ nama: w.nama, no: pad(w.no), kat: w.kat, av: w.av, hari: String(w.hari || (ST.stats && ST.stats.hari) || 1), judul: 'WARGA SIKEPO', bg: 'hari2', size, fantasy: FANT() });
@@ -154,6 +154,7 @@
       ST.warga = warga || []; ST.stats = stats || {}; PETA.setWarga(ST.warga);
       await bgReady; renderStats();
       if (mine) showMine(mine); else preview();
+      if (window.ONBOARD) ONBOARD.start({ mine, daftar: async row => { const w = await DATA.daftar(row); if (!ST.warga.some(x => x.no === w.no)) { ST.warga.push(w); PETA.add(w); } showMine(w); renderStats(); return w; }, hari: () => (ST.stats && ST.stats.hari) || 1, clean: cleanNama, focus: no => { location.hash = 'peta'; PETA.focus(no); } });
     } catch (e) { status('Data kota belum bisa dimuat. Coba muat ulang halaman.', true); await bgReady; preview(); renderStats(); }
     renderAkun(); DATA.onAuth(async () => { renderAkun(); const m = await DATA.myCard(); if (m) showMine(m); });
     DATA.onNew(w => { if (ST.warga.some(x => x.no === w.no)) return; ST.warga.push(w); PETA.add(w); renderStats(); });
