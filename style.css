@@ -257,3 +257,6 @@ body.app.v-kartu #kartu { display: block; position: fixed; left: 10px; right: 10
 body.app.v-kartu main { z-index: 30; } body.app.v-kartu .peta-sec { z-index: 0; }
 .tav .tav-daftar { left: 12px; transform: none; bottom: auto; top: calc(62px + env(safe-area-inset-top, 0px)); }
 .chat-m { padding: 3px 0; border-bottom: 1px dashed #c8b080; } .chat-m b { font-family: var(--display); font-size: 9px; color: var(--red); margin-right: 6px; } .chat-empty { color: #777; margin: 0; }
+/* kartu warga di peta: di atas semua panel, lebar penuh di HP (15 Nov) */
+body.app .pick { z-index: 60; left: 10px; right: 10px; width: auto; max-width: 420px; margin: 0 auto; top: calc(70px + env(safe-area-inset-top, 0px)); }
+body.app:has(#pick:not([hidden])) .ui-count { display: none; }
