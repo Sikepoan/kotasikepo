@@ -113,8 +113,11 @@
 
   // ---------- canvas / camera ----------
   let cv, cx, cam = { x: ISL.cx, y: ISL.cy, z: 3 }, dpr = 1, last = 0;
-  const zMin = () => Math.max(1.5, Math.min(cv.width / dpr / WW, cv.height / dpr / WH) * 0.95), zMax = 9;
-  function clampCam() { cam.z = Math.max(zMin(), Math.min(zMax, cam.z)); cam.x = Math.max(20, Math.min(WW - 20, cam.x)); cam.y = Math.max(20, Math.min(WH - 20, cam.y)); }
+  const SB = { x0: 0, x1: 360, y0: 50, y1: 251 };   // batas gambar lahan (SMODE): layar selalu penuh lahan
+  const zMin = () => SMODE ? Math.max(cv.width / dpr / (SB.x1 - SB.x0), cv.height / dpr / (SB.y1 - SB.y0)) * 1.001 : Math.max(1.5, Math.min(cv.width / dpr / WW, cv.height / dpr / WH) * 0.95), zMax = 9;
+  function clampCam() { cam.z = Math.max(zMin(), Math.min(zMax, cam.z));
+    if (SMODE) { const hw = cv.width / dpr / cam.z / 2, hh = cv.height / dpr / cam.z / 2; cam.x = Math.max(SB.x0 + hw, Math.min(SB.x1 - hw, cam.x)); cam.y = Math.max(SB.y0 + hh, Math.min(SB.y1 - hh, cam.y)); return; }
+    cam.x = Math.max(20, Math.min(WW - 20, cam.x)); cam.y = Math.max(20, Math.min(WH - 20, cam.y)); }
   function resize() { const r = cv.getBoundingClientRect(); dpr = Math.min(2, window.devicePixelRatio || 1); cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); clampCam(); }
   const toScreen = (x, y) => [(x - cam.x) * cam.z * dpr + cv.width / 2, (y - cam.y) * cam.z * dpr + cv.height / 2];
   const toWorld = (sx, sy) => [(sx * dpr - cv.width / 2) / (cam.z * dpr) + cam.x, (sy * dpr - cv.height / 2) / (cam.z * dpr) + cam.y];
@@ -358,7 +361,7 @@
   }
 
   window.PETA = {
-    init(canvas) { cv = canvas; cx = cv.getContext('2d'); drawBg(); resize(); cam.z = Math.max(zMin(), 2.6); clampCam(); bindInput(); requestAnimationFrame(frame);
+    init(canvas) { cv = canvas; cx = cv.getContext('2d'); drawBg(); resize(); cam.z = Math.max(zMin(), 2.6); if (SMODE) cam.y = 175; clampCam(); bindInput(); requestAnimationFrame(frame);
       setInterval(() => { if (isKota() === KMODE && isFant() === FMODE) return; KMODE = isKota(); FMODE = isFant(); applyLayout(); g.clearRect(0, 0, WW, WH); drawBg();
         P.walkers.forEach(o => { const s = spot(o.w.no * 2.91 + 9); o.x = o.tx = s.x; o.y = o.ty = s.y; o.home = homeOf(o.w); o.sleep = false; });
         const [ex, ey] = KMODE ? ENTRY() : [HOME.x + 2, HOME.y + 1]; U.x = U.tx = ex; U.y = U.ty = ey; }, 20000); },
@@ -367,7 +370,7 @@
     focus(no) { const o = P.byNo.get(no); if (!o) return false; P.sel = o; const z0 = cam.z, x0 = cam.x, y0 = cam.y, z1 = Math.max(5, z0), t0 = performance.now();
       const go = ts => { const k = Math.min(1, (ts - t0) / 700), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; cam.x = x0 + (o.x - x0) * e; cam.y = y0 + (o.y - 8 - y0) * e; cam.z = z0 + (z1 - z0) * e; clampCam(); if (k < 1) requestAnimationFrame(go); }; requestAnimationFrame(go); return true; },
     zoom(f) { cam.z *= f; clampCam(); },
-    reset() { cam = { x: ISL.cx, y: ISL.cy, z: Math.max(zMin(), 2.6) }; clampCam(); P.sel = null; },
+    reset() { cam = { x: ISL.cx, y: SMODE ? 175 : ISL.cy, z: Math.max(zMin(), 2.6) }; clampCam(); P.sel = null; },
     showAll(v) { P.showAll = v; },
     onPick(f) { P.onPick = f; },
     onSawit(f) { P.onSawit = f; },
