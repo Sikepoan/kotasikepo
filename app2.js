@@ -32,7 +32,7 @@
   // ---------- pin tempat ----------
   const PINS = [
     { id: 'tavern', ic: 'tavern', t: 'TAVERN GUILD', on: () => window.FANT3 && FANT3.tavern() >= 4, at: () => [FANT3.CAMP.x, FANT3.CAMP.y - 66], go: () => openTavern() },
-    { id: 'gua', ic: 'gua', t: 'GUA NAGA', on: () => !!window.FANT3, at: () => [180, 40], go: () => toast('GUA NAGA', 'Mata merahnya selalu mengawasi desa. Jangan dekat-dekat sebelum party siap!') },
+    { id: 'gua', ic: 'gua', t: 'GUA NAGA', on: () => false, at: () => [180, 40], go: () => toast('GUA NAGA', 'Mata merahnya selalu mengawasi desa. Jangan dekat-dekat sebelum party siap!') },
     { id: 'bengkel', ic: 'bengkel', t: 'BENGKEL', on: () => window.FANT3 && FANT3.tavern() >= 4 && ((ST().stats || {}).hari || 0) >= 3, at: () => [FANT3.CAMP.x + 78, FANT3.CAMP.y + 26], sub: () => ($('qNum') || {}).textContent || '', go: () => open('siaran') }
   ];
   const pinBox = $('uiPins'); PINS.forEach(p => { const b = document.createElement('button'); b.className = 'pin'; b.type = 'button'; b.innerHTML = `<i class="ic"></i><b></b>`; b.querySelector('i').style.backgroundImage = ICON[p.ic]; b.onclick = p.go; p.el = b; pinBox.append(b); });
