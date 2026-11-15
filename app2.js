@@ -53,8 +53,21 @@
   const KABAR = [
     ['DAY 1', 'Kota Sikepo dibuka! Warganya masih kosong', 'Wali Kota Udin membuka Kota Sikepo, kota yang isinya diatur netizen. Follow = jadi warga. Komen usulan bangunan, yang like-nya terbanyak besok dibangun!']
   ];
-  function kabar() { const b = $('kabarB'); b.innerHTML = ''; KABAR.forEach(([d, j, s]) => { const a = document.createElement('article'); a.className = 'k-item'; const t = document.createElement('span'); t.className = 'ui-tag'; t.textContent = d; const h = document.createElement('b'); h.textContent = j; const p = document.createElement('p'); p.textContent = s; a.append(t, h, p); b.append(a); });
-    const r = $('rules'); if (r) b.append(r); const so = $('sosmed'); if (so) { const w = document.createElement('div'); w.className = 'k-sos'; w.append(so); b.append(w); } }
+  let kTab = 'siaran';
+  function kabar() { const b = $('kabarB'); b.innerHTML = '';
+    const tabs = document.createElement('div'); tabs.className = 'k-tabs';
+    [['siaran', 'SIARAN'], ['usulan', 'USULAN']].forEach(([k, l]) => { const t = document.createElement('button'); t.type = 'button'; t.textContent = l; if (kTab === k) t.className = 'on'; t.onclick = () => { kTab = k; kabar(); }; tabs.append(t); }); b.append(tabs);
+    if (kTab === 'usulan') {
+      const h = document.createElement('div'); h.className = 'k-box'; h.innerHTML = '<b>USULAN BANGUNAN</b><p>Komen usulan bangunan di video terbaru Wali Kota Udin. Usulan dengan like terbanyak dibangun besoknya.</p>'; b.append(h);
+      const U = window.SIKEPO_USULAN || [];
+      if (!U.length) { const e = document.createElement('p'); e.className = 'k-empty'; e.textContent = 'Belum ada usulan. Komen di video Day 1, jadilah pengusul pertama!'; b.append(e); }
+      U.forEach(([n, like], k) => { const r = document.createElement('div'); r.className = 'k-us' + (k ? '' : ' top'); const a = document.createElement('b'); a.textContent = (k + 1) + '. ' + n; const c = document.createElement('small'); c.textContent = like + ' LIKE'; r.append(a, c); b.append(r); });
+      return; }
+    const off = document.createElement('div'); off.className = 'k-box'; off.innerHTML = '<b>AKUN RESMI KOTA SIKEPO</b><p>Akun resmi cuma 3 ini. Ketuk untuk buka:</p>';
+    [['TIKTOK', '@walikot.udin', 'https://www.tiktok.com/@walikot.udin'], ['INSTAGRAM', '@kepodungeon', 'https://www.instagram.com/kepodungeon'], ['YOUTUBE', '@sikepo_an', 'https://www.youtube.com/@sikepo_an']].forEach(([n, h, u]) => { const a = document.createElement('a'); a.className = 'k-acc'; a.href = u; a.target = '_blank'; a.rel = 'noopener'; const x = document.createElement('b'); x.textContent = n; const y = document.createElement('small'); y.textContent = h; a.append(x, y); off.append(a); }); b.append(off);
+    const wr = document.createElement('div'); wr.className = 'k-warn'; wr.innerHTML = '<b>SELAIN 3 AKUN DI ATAS = PALSU</b><p>Kota Sikepo tidak pernah minta transfer, password, atau data pribadi. Kalau ketemu akun tiruan, report ya!</p>'; b.append(wr);
+    KABAR.forEach(([d, j, s]) => { const a = document.createElement('article'); a.className = 'k-item'; const t = document.createElement('span'); t.className = 'ui-tag'; t.textContent = d; const h = document.createElement('b'); h.textContent = j; const p = document.createElement('p'); p.textContent = s; a.append(t, h, p); b.append(a); });
+    const r = $('rules'); if (r) b.append(r); }
 
   // ---------- navigasi ----------
   const SHEETS = { guild: 'sheetGuild', kabar: 'sheetKabar', siaran: 'sheetSiaran', kartu: 'kartu' };

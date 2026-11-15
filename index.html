@@ -16,7 +16,7 @@
 <link rel="icon" href="img/icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=Inter:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=20261115d">
+<link rel="stylesheet" href="style.css?v=20261116b">
 </head>
 <body class="app">
 <div id="demoBar" class="demo" hidden>MODE DEMO: belum tersambung database, data contoh tersimpan di browser ini saja.</div>
@@ -83,7 +83,12 @@
   <section id="kartu" class="sec">
     <div class="wrap grid2">
       <div class="col">
-        <h2>Bikin Kartu Warga</h2>
+        <div class="k-intro px" id="kIntro"><small>KARTU WARGA SIKEPO</small><h3><span id="kiN">0</span> warga udah punya kartu</h3>
+          <div class="k-avs"><img src="img/w/w0.png" alt=""><img src="img/w/w2.png" alt=""><img src="img/w/w6.png" alt=""><img src="img/w/w5.png" alt=""><img src="img/w/w4.png" alt=""></div>
+          <p class="k-big">Follow = jadi warga.<br>Kartu = namamu muncul di peta.</p>
+          <ul><li>Namamu jalan-jalan di peta Kota Sikepo</li><li>Ikut usul bangunan lewat komen</li><li>Ngobrol bareng warga lain</li></ul>
+          <a class="btn" href="#formKartu" onclick="document.getElementById('formKartu')&&document.getElementById('formKartu').scrollIntoView({behavior:'smooth'});return false;">BIKIN KARTU, GRATIS</a></div>
+        <h2 id="formKartu">Bikin Kartu Warga</h2>
         <p class="lead">Isi username kamu, pilih karakter, dan kartumu langsung jadi. Namamu otomatis ikut jalan-jalan di peta. Satu orang satu kartu ya.</p>
 
         <div id="perluLogin" class="panel login-box" hidden>
@@ -167,7 +172,7 @@
     <div class="ui-siaran px" id="uiSiaran" hidden><span class="ui-tag">SIARAN</span><button class="ui-siaran-t" id="uiSiaranT" type="button"><b id="uiSiaranJ"></b><small>Pengumuman Kota · ketuk untuk baca</small></button><button class="ui-x" id="uiSiaranX" aria-label="Tutup siaran">×</button></div>
   </div>
   <div class="ui-clock px" id="uiClock"><b id="uiJam">--:--</b> WIB<small id="uiFase">—</small></div>
-  <div class="ui-count px" id="uiCount"><b id="uiWarga">—</b> warga<i class="ui-bar"></i><small><span class="dot"></span> <span id="uiKartu">—</span> punya kartu</small></div>
+  <div class="ui-count px" id="uiCount"><b id="uiWarga">—</b> warga<i class="ui-bar"></i><small><span class="dot"></span> <span id="uiKartu">—</span> punya kartu</small><small class="ui-on"><span class="dot on"></span> <span id="uiOnline">1</span> online sekarang</small></div>
   <div class="ui-pins" id="uiPins"></div>
   <nav class="ui-nav" id="uiNav" aria-label="Menu utama">
     <button data-v="peta" aria-current="page"><i class="ic ic-peta"></i>PETA</button>
@@ -178,7 +183,7 @@
   </nav>
 </div>
 <section class="sheet px" id="sheetGuild" hidden><div class="sheet-h"><b>GUILD KEPO FANTASY</b><button class="ui-x" data-close>×</button></div><div class="sheet-b" id="guildB"></div></section>
-<section class="sheet px" id="sheetKabar" hidden><div class="sheet-h"><b>KABAR DESA</b><button class="ui-x" data-close>×</button></div><div class="sheet-b" id="kabarB"></div></section>
+<section class="sheet px" id="sheetKabar" hidden><div class="sheet-h"><b>KABAR KOTA</b><button class="ui-x" data-close>×</button></div><div class="sheet-b" id="kabarB"></div></section>
 <section class="sheet px" id="sheetSiaran" hidden><div class="sheet-h"><b>SIARAN KOTA</b><button class="ui-x" data-close>×</button></div><div class="sheet-b" id="siaranB"></div></section>
 <div class="onb" id="onb" role="dialog" aria-modal="true" aria-labelledby="onbJudul" hidden>
   <div class="onb-card">
@@ -225,17 +230,18 @@
 
 <footer class="foot"><div class="wrap"><div class="btns sos-foot" id="sosFoot"></div>Kota Sikepo · dibuat oleh Wali Kota Udin dan warganya · <span id="fMode"></span></div></footer>
 
-<script src="config.js?v=20261115d"></script>
+<script src="config.js?v=20261116b"></script>
 <script src="vendor/supabase.js"></script>
-<script src="kartu.js?v=20261115d"></script>
-<script src="data.js?v=20261115d"></script>
-<script src="kota3.js?v=20261115d"></script>
-<script src="fantasy3.js?v=20261115d"></script>
-<script src="peta.js?v=20261115d"></script>
-<script src="pov.js?v=20261115d"></script>
-<script src="tavern.js?v=20261115d"></script>
-<script src="onboard.js?v=20261115d"></script>
-<script src="app2.js?v=20261115d"></script>
-<script src="app.js?v=20261115d"></script>
+<script src="kartu.js?v=20261116b"></script>
+<script src="data.js?v=20261116b"></script>
+<script src="kota3.js?v=20261116b"></script>
+<script src="fantasy3.js?v=20261116b"></script>
+<script src="peta.js?v=20261116b"></script>
+<script src="pov.js?v=20261116b"></script>
+<script src="tavern.js?v=20261116b"></script>
+<script src="onboard.js?v=20261116b"></script>
+<script src="app2.js?v=20261116b"></script>
+<script src="online.js?v=20261116b"></script>
+<script src="app.js?v=20261116b"></script>
 </body>
 </html>

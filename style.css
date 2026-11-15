@@ -260,3 +260,17 @@ body.app.v-kartu main { z-index: 30; } body.app.v-kartu .peta-sec { z-index: 0; 
 /* kartu warga di peta: di atas semua panel, lebar penuh di HP (15 Nov) */
 body.app .pick { z-index: 60; left: 10px; right: 10px; width: auto; max-width: 420px; margin: 0 auto; top: calc(70px + env(safe-area-inset-top, 0px)); }
 body.app:has(#pick:not([hidden])) .ui-count { display: none; }
+/* 16 Nov: pola dari referensi (kabar bertab, akun resmi, intro kartu, online) — gaya pixel Kota Sikepo */
+.ui-count .ui-on { display: block; margin-top: 3px; } .ui-count .dot.on { background: #3fd06a; box-shadow: 0 0 0 2px rgba(63,208,106,.3); border-radius: 50%; }
+.k-tabs { display: flex; gap: 6px; margin-bottom: 10px; } .k-tabs button { flex: 1; font-family: var(--display); font-size: 11px; padding: 9px 4px; border: 3px solid var(--ink); background: #fff6dc; color: var(--ink); cursor: pointer; }
+.k-tabs button.on { background: var(--gold); box-shadow: inset 0 -3px 0 rgba(0,0,0,.18); }
+.k-box, .k-warn { border: 3px solid var(--ink); background: #fff6dc; color: var(--ink); padding: 10px; margin-bottom: 10px; } .k-box > b, .k-warn > b { font-family: var(--display); font-size: 11px; display: block; margin-bottom: 4px; }
+.k-box p, .k-warn p { margin: 0 0 6px; font-size: 13px; } .k-warn { background: #ffe0dc; border-color: #c8302a; } .k-warn > b { color: #c8302a; }
+.k-acc { display: flex; justify-content: space-between; align-items: center; border: 2px solid var(--ink); background: #fff; padding: 8px 10px; margin-top: 6px; text-decoration: none; color: var(--ink); } .k-acc b { font-family: var(--display); font-size: 10px; } .k-acc small { font-size: 13px; color: #c8302a; }
+.k-us { display: flex; justify-content: space-between; border: 3px solid var(--ink); background: #fff6dc; color: var(--ink); padding: 9px 10px; margin-bottom: 6px; } .k-us.top { background: var(--gold); } .k-us b { font-family: var(--display); font-size: 11px; } .k-us small { color: #c8302a; font-family: var(--display); font-size: 10px; }
+.k-empty { text-align: center; padding: 14px 6px; opacity: .8; }
+.k-intro { border: 3px solid var(--ink); background: #fff6dc; color: var(--ink); padding: 14px; margin-bottom: 16px; box-shadow: 4px 4px 0 var(--ink); }
+.k-intro > small { font-family: var(--display); font-size: 10px; color: #c8302a; } .k-intro h3 { margin: 4px 0 8px; font-size: 22px; line-height: 1.2; }
+.k-avs { display: flex; margin: 6px 0 10px; } .k-avs img { height: 46px; image-rendering: pixelated; margin-right: -6px; background: #ffd84a; border: 2px solid var(--ink); border-radius: 50%; width: 46px; object-fit: cover; object-position: top; }
+.k-intro .k-big { font-family: var(--display); font-size: 13px; line-height: 1.6; margin: 0 0 8px; } .k-intro ul { margin: 0 0 12px; padding-left: 18px; font-size: 14px; } .k-intro .btn { display: block; text-align: center; }
+.k-intro h3, .k-intro h3 span { color: var(--ink) !important; font-family: var(--display); font-size: 18px; } .k-intro ul, .k-intro li { font-family: var(--body) !important; font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--ink); }
