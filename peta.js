@@ -38,7 +38,7 @@
   const kAt = (c, r) => [KO[0] + c * KU[0] + r * KV[0], KO[1] + c * KU[1] + r * KV[1]];
   const kCol = i => { const c = i % PERROW; return c >= 5 ? c + 1 : c; };          // kolom 5 = jalan utama
   let HS = [];
-  function houseSpots(n) { HS = []; for (let i = 0; i < n; i++) { const [x, y] = kAt(kCol(i), Math.floor(i / PERROW)); HS.push({ x, y }); } const [hx, hy] = kAt(5, Math.max(1, Math.ceil(n / PERROW)) - 0.2); Object.assign(HOME, { x: hx, y: hy }); if (typeof U !== 'undefined') { const g = GATE(); U.x = U.tx = g.x + 8; U.y = U.ty = g.y - 14; } }
+  function houseSpots(n) { HS = []; for (let i = 0; i < n; i++) { const [x, y] = kAt(kCol(i), Math.floor(i / PERROW)); const w = (P.walkers.slice().sort((p, q) => p.w.no - q.w.no)[i] || {}).w; HS.push({ x, y, nama: w ? String(w.nama || '').toUpperCase().slice(0, 16) : '', no: w ? w.no : 0 }); } const [hx, hy] = kAt(5, Math.max(1, Math.ceil(n / PERROW)) - 0.2); Object.assign(HOME, { x: hx, y: hy }); if (typeof U !== 'undefined') { const g = GATE(); U.x = U.tx = g.x + 8; U.y = U.ty = g.y - 14; } }
   const ROWS = () => Math.max(1, Math.ceil(HS.length / PERROW));
   const GATE = () => { const [x, y] = kAt(5, ROWS() + 1.2); return { x, y }; };
   const sLand = (x, y) => x > SB.x0 + 20 && x < SB.x1 - 20 && y > SB.y0 + 20 && y < SB.y1 - 20 && !HS.some(h => Math.abs(h.x - x) < 15 && y < h.y + 3 && y > h.y - 12);
@@ -316,7 +316,8 @@
     if (!window.PETA_HIDE) {
     if (SMODE) { const RI = window.__RI || (window.__RI = Object.assign(new Image(), { src: 'img/rumah3d.png' })), GI = window.__GI || (window.__GI = Object.assign(new Image(), { src: 'img/gerbang3d.png' }));
       const items = list.map(o => [o.y, () => drawWalker(cx, o, t)]); items.push([U.y, () => drawUdin(cx, night, t)]);
-      if (RI.complete && RI.naturalWidth) for (const h of HS) items.push([h.y, () => { const hh = 36 * z, ww = RI.naturalWidth / RI.naturalHeight * hh, [a, b] = toScreen(h.x, h.y); cx.imageSmoothingEnabled = true; cx.drawImage(RI, Math.round(a - ww / 2), Math.round(b - hh * 0.82), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]);
+      if (RI.complete && RI.naturalWidth) for (const h of HS) items.push([h.y, () => { const hh = 36 * z, ww = RI.naturalWidth / RI.naturalHeight * hh, [a, b] = toScreen(h.x, h.y); cx.imageSmoothingEnabled = true; cx.drawImage(RI, Math.round(a - ww / 2), Math.round(b - hh * 0.82), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false;
+        if (h.nama && window.SK && cam.z >= 1.6) { const sc = Math.max(1, Math.round(dpr * (cam.z >= 3 ? 2 : 1))), tw = SK.tw(h.nama, sc), y = Math.round(b - hh * 0.86 - 11 * sc); cx.fillStyle = 'rgba(28,28,36,0.85)'; cx.fillRect(Math.round(a - tw / 2 - 3 * sc), y - 2 * sc, tw + 6 * sc, 11 * sc); SK.txt(cx, h.nama, Math.round(a - tw / 2), y, sc, '#ffffff', null); } }]);
       const gt = GATE(); if (GI.complete && GI.naturalWidth) items.push([gt.y, () => { const hh = 62 * z, ww = GI.naturalWidth / GI.naturalHeight * hh, [a, b] = toScreen(gt.x, gt.y); cx.imageSmoothingEnabled = true; cx.drawImage(GI, Math.round(a - ww * 0.46), Math.round(b - hh * 0.8), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]);
       items.sort((p, q) => p[0] - q[0]).forEach(([, f]) => f()); }
     else { for (const o of list) { if (!udDrawn && o.y > U.y) { drawUdin(cx, night, t); udDrawn = true; } drawWalker(cx, o, t); }
