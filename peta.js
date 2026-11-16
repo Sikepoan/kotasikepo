@@ -191,7 +191,7 @@
     const z = cam.z * dpr, [sx, sy] = toScreen(o.x, o.y), s = Math.max(1, Math.round(z));
     if (sx < -20 * s || sy < -30 * s || sx > cv.width + 20 * s || sy > cv.height + 20 * s) return;
     const r = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(sx + x * s), Math.round(sy + y * s), w * s, h * s); };
-    if (SMODE) { const im = simg('w/w' + (Math.abs(o.w.no | 0) % 10)); if (!im.complete || !im.naturalWidth) return; const hh = 16 * z, ww = im.naturalWidth / im.naturalHeight * hh, b = o.moving ? Math.abs(Math.sin(t * 9 + o.ph)) * z * 0.8 : 0;
+    if (SMODE) { const AVM = { COWOK1: 9, COWOK2: 1, COWOK3: 6, CEWEK1: 5, CEWEK2: 2, CEWEK3: 3 }, MIS = [4, 0, 7, 8], ai = AVM[o.w.av] ?? MIS[Math.abs(o.w.no | 0) % 4], im = simg('w/w' + ai); if (!im.complete || !im.naturalWidth) return; const hh = 16 * z, ww = im.naturalWidth / im.naturalHeight * hh, b = o.moving ? Math.abs(Math.sin(t * 9 + o.ph)) * z * 0.8 : 0;
       c.fillStyle = 'rgba(0,0,0,0.22)'; c.fillRect(Math.round(sx - ww * 0.3), Math.round(sy - z * 0.5), Math.round(ww * 0.6), Math.max(1, Math.round(z)));
       c.save(); c.translate(Math.round(sx), 0); if (o.tx < o.x - 0.3) c.scale(-1, 1); c.drawImage(im, Math.round(-ww / 2), Math.round(sy - hh - b), Math.round(ww), Math.round(hh)); c.restore();
       if (P.sel === o) { c.fillStyle = '#ffd84a'; c.fillRect(Math.round(sx - 2 * z), Math.round(sy - hh - 4 * z), Math.round(4 * z), Math.round(2 * z)); } return; }
