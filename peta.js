@@ -171,6 +171,7 @@
   function step(dt, night) {
     for (const o of P.walkers) {
       if (night > 0.6) {   // malam: pulang ke tikar sendiri & tidur
+        if (SMODE) { const h = HS.find(q => q.no === o.w.no); if (h) o.home = { x: h.x + 6, y: h.y + 4 }; }
         const dx = o.home.x - o.x, dy = o.home.y - o.y, d = Math.hypot(dx, dy);
         if (d > 0.6) { const v = Math.min(d, 14 * dt); o.x += dx / d * v; o.y += dy / d * v; o.moving = true; } else o.moving = false;
         o.sleep = d <= 0.6; continue;
@@ -196,7 +197,7 @@
       c.save(); c.translate(Math.round(sx), 0); if (o.tx < o.x - 0.3) c.scale(-1, 1); c.drawImage(im, Math.round(-ww / 2), Math.round(sy - hh - b), Math.round(ww), Math.round(hh)); c.restore();
       if (P.sel === o) { c.fillStyle = '#ffd84a'; c.fillRect(Math.round(sx - 2 * z), Math.round(sy - hh - 4 * z), Math.round(4 * z), Math.round(2 * z)); } return; }
     const tk = o.w.kat === 'TUKANG', av = o.w.av || 'MISTERI', skin = SKIN[av] || '#f4b47c', hair = HAIR[av] || '#1c1c24';
-    if (o.sleep && KMODE) return;   // tidur di dalam rumah
+    if (o.sleep && (KMODE || (SMODE && HS.some(q => q.no === o.w.no)))) return;   // tidur di dalam rumah
     if (o.sleep && FMODE) { o.moving = false; const jx = Math.round(Math.sin(t * 40 + o.ph) * 0.6); r(-3 + jx, 0, 7, 1, 'rgba(0,0,0,0.25)'); r(-1 + jx, -10, 3, 3, skin); r(-1 + jx, -11, 3, 1, hair); r(-2 + jx, -7, 5, 4, tk ? '#2a5fc8' : o.col); r(-2 + jx, -3, 2, 3, '#24242e'); r(1 + jx, -3, 2, 3, '#24242e'); if (Math.floor(t * 2 + o.ph) % 3 === 0) r(3, -12, 1, 2, '#8fd8ff'); return; }
     if (o.sleep) {   // tikar kecil + tidur
       for (let y = 0; y < 4; y++) r(-5 - y * 0.5, -1 + y, 10, 1, y % 3 === 0 ? '#8a2a1a' : (y % 2 ? '#e0a64a' : '#c8502e'));
