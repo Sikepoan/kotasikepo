@@ -307,7 +307,7 @@
     else cx.drawImage(bg, Math.round(ox), Math.round(oy), Math.round(WW * z), Math.round(WH * z));
     // sea shimmer
     cx.fillStyle = 'rgba(255,255,255,0.35)';
-    if (SMODE && window.SK) { const nEl = document.getElementById('hWarga'), v = nEl && nEl.textContent.trim(), txt = 'WARGA: ' + (v && v !== '—' ? v : '0'), sc = Math.max(1, Math.round(z / 2.2)), w = SK.tw(txt, sc), [a, b2] = toScreen(GATE().x, GATE().y + 4);
+    if (SMODE && window.SK) { const nEl = document.getElementById('hWarga'), v = nEl && nEl.textContent.trim(), txt = 'WARGA: ' + (v && v !== '—' ? v : '0'), sc = Math.max(1, Math.round(z / 2.2)), w = SK.tw(txt, sc), [a, b2] = toScreen(GATE().x - 4, GATE().y + 14);
       cx.fillStyle = '#1c1c24'; cx.fillRect(Math.round(a - w / 2 - 5 * sc), Math.round(b2 - 3 * sc), w + 10 * sc, 13 * sc); cx.fillStyle = '#7a4a22'; cx.fillRect(Math.round(a - w / 2 - 4 * sc), Math.round(b2 - 2 * sc), w + 8 * sc, 11 * sc); SK.txt(cx, txt, Math.round(a - w / 2), Math.round(b2), sc, '#ffd84a', null); }
     if (!FMODE && !SMODE) for (let i = 0; i < 18; i++) { const x = (rnd(i) * WW + t * (3 + i % 4)) % WW, y = rnd(i * 7) * WH; if (inDia(x, y, ISL, -6)) continue; const [a, b2] = toScreen(x, y); cx.fillRect(Math.round(a), Math.round(b2), Math.round(5 * z), Math.max(1, Math.round(z))); }
     // sprites sorted by y
@@ -317,7 +317,7 @@
     if (SMODE) { const RI = window.__RI || (window.__RI = Object.assign(new Image(), { src: 'img/rumah3d.png' })), GI = window.__GI || (window.__GI = Object.assign(new Image(), { src: 'img/gerbang3d.png' }));
       const items = list.map(o => [o.y, () => drawWalker(cx, o, t)]); items.push([U.y, () => drawUdin(cx, night, t)]);
       if (RI.complete && RI.naturalWidth) for (const h of HS) items.push([h.y, () => { const hh = 36 * z, ww = RI.naturalWidth / RI.naturalHeight * hh, [a, b] = toScreen(h.x, h.y); cx.imageSmoothingEnabled = true; cx.drawImage(RI, Math.round(a - ww / 2), Math.round(b - hh * 0.82), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]);
-      const gt = GATE(); if (GI.complete && GI.naturalWidth) items.push([gt.y, () => { const hh = 50 * z, ww = GI.naturalWidth / GI.naturalHeight * hh, [a, b] = toScreen(gt.x, gt.y); cx.imageSmoothingEnabled = true; cx.drawImage(GI, Math.round(a - ww / 2), Math.round(b - hh), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]);
+      const gt = GATE(); if (GI.complete && GI.naturalWidth) items.push([gt.y, () => { const hh = 62 * z, ww = GI.naturalWidth / GI.naturalHeight * hh, [a, b] = toScreen(gt.x, gt.y); cx.imageSmoothingEnabled = true; cx.drawImage(GI, Math.round(a - ww * 0.46), Math.round(b - hh * 0.8), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]);
       items.sort((p, q) => p[0] - q[0]).forEach(([, f]) => f()); }
     else { for (const o of list) { if (!udDrawn && o.y > U.y) { drawUdin(cx, night, t); udDrawn = true; } drawWalker(cx, o, t); }
     if (!udDrawn) drawUdin(cx, night, t); }
