@@ -19,7 +19,7 @@
   const isKota = () => !SMODE && !!window.KOTA3 && !isFant() && (window.SIKEPO_FORCE_KOTA ?? (Date.now() >= KOTA_AT));
   let KMODE = isKota(), FMODE = isFant(), LIGHTS = [];
   const ISL0 = Object.assign({}, ISL), PLOT0 = Object.assign({}, PLOT), HOME0 = Object.assign({}, HOME);
-  function applyLayout() { if (SMODE) { Object.assign(ISL, { cx: 180, cy: 136, hw: 160, hh: 72 }); Object.assign(PLOT, { cx: -999, cy: -999, hw: 1, hh: 1 }); Object.assign(HOME, { x: 174, y: 176 }); return; } if (FMODE) { Object.assign(ISL, FANT3.ISL); Object.assign(PLOT, { cx: -999, cy: -999, hw: 1, hh: 1 }); Object.assign(HOME, FANT3.HOME); return; }
+  function applyLayout() { if (SMODE) { Object.assign(ISL, { cx: 150, cy: 110, hw: 330, hh: 230 }); Object.assign(PLOT, { cx: -999, cy: -999, hw: 1, hh: 1 }); Object.assign(HOME, { x: 150, y: 160 }); return; } if (FMODE) { Object.assign(ISL, FANT3.ISL); Object.assign(PLOT, { cx: -999, cy: -999, hw: 1, hh: 1 }); Object.assign(HOME, FANT3.HOME); return; }
     if (KMODE) { Object.assign(ISL, { cx: 180, cy: 150, hw: 172, hh: 88 }); Object.assign(PLOT, KOTA3.PLOT); Object.assign(HOME, { x: 125, y: 98 }); }
     else { Object.assign(ISL, ISL0); Object.assign(PLOT, PLOT0); Object.assign(HOME, HOME0); } }
   applyLayout();
@@ -33,7 +33,15 @@
     if (o.pa != null && nb.length > 1 && Math.random() < 0.7) { const fw = nb.find(([x, y]) => x - a === o.pa && y - b === o.pb); if (fw) pick = fw; }
     o.pa = pick[0] - a; o.pb = pick[1] - b; const [x, y] = KOTA3.tw(pick[0], pick[1]); return { x: x + (o.jx || 0), y: y + (o.jy || 0) };
   }
-  const sLand = (x, y) => x > 12 && x < 348 && y > 60 && y < 212 && !(x > 112 && x < 240 && y > 180);
+  // ===== KOMPLEKS ISOMETRIK: 1 rumah per warga terdaftar, berbaris rapi menghadap jalan =====
+  const KU = [34, 17], KV = [-44, 22], KO = [120, -20], PERROW = 10;
+  const kAt = (c, r) => [KO[0] + c * KU[0] + r * KV[0], KO[1] + c * KU[1] + r * KV[1]];
+  const kCol = i => { const c = i % PERROW; return c >= 5 ? c + 1 : c; };          // kolom 5 = jalan utama
+  let HS = [];
+  function houseSpots(n) { HS = []; for (let i = 0; i < n; i++) { const [x, y] = kAt(kCol(i), Math.floor(i / PERROW)); HS.push({ x, y }); } const [hx, hy] = kAt(5, Math.max(1, Math.ceil(n / PERROW)) - 0.2); Object.assign(HOME, { x: hx, y: hy }); if (typeof U !== 'undefined') { const g = GATE(); U.x = U.tx = g.x + 8; U.y = U.ty = g.y - 14; } }
+  const ROWS = () => Math.max(1, Math.ceil(HS.length / PERROW));
+  const GATE = () => { const [x, y] = kAt(5, ROWS() + 1.2); return { x, y }; };
+  const sLand = (x, y) => x > SB.x0 + 20 && x < SB.x1 - 20 && y > SB.y0 + 20 && y < SB.y1 - 20 && !HS.some(h => Math.abs(h.x - x) < 15 && y < h.y + 3 && y > h.y - 12);
   const onLand = (x, y) => SMODE ? sLand(x, y) : FMODE ? FANT3.walk(x, y) : KMODE ? kWalk(x, y) : (inDia(x, y, ISL, 6) && !inDia(x, y, PLOT, -2) && Math.hypot(x - HOME.x, (y - HOME.y) * 2) > 16);
 
   // ---------- static background ----------
@@ -113,8 +121,8 @@
 
   // ---------- canvas / camera ----------
   let cv, cx, cam = { x: ISL.cx, y: ISL.cy, z: 3 }, dpr = 1, last = 0;
-  const SB = { x0: 0, x1: 360, y0: 50, y1: 252.5 };   // batas gambar lahan (SMODE): layar selalu penuh lahan
-  const zMin = () => SMODE ? Math.max(cv.width / dpr / (SB.x1 - SB.x0), cv.height / dpr / (SB.y1 - SB.y0)) * 1.001 : Math.max(1.5, Math.min(cv.width / dpr / WW, cv.height / dpr / WH) * 0.95), zMax = 9;
+  const SB = { x0: -330, x1: 650, y0: -200, y1: 420 };   // batas gambar lahan (SMODE): layar selalu penuh lahan
+  const zMin = () => SMODE ? Math.max(cv.width / dpr / (SB.x1 - SB.x0), cv.height / dpr / (SB.y1 - SB.y0), 0.8) * 1.001 : Math.max(1.5, Math.min(cv.width / dpr / WW, cv.height / dpr / WH) * 0.95), zMax = 9;
   function clampCam() { cam.z = Math.max(zMin(), Math.min(zMax, cam.z));
     if (SMODE) { const hw = cv.width / dpr / cam.z / 2, hh = cv.height / dpr / cam.z / 2; cam.x = Math.max(SB.x0 + hw, Math.min(SB.x1 - hw, cam.x)); cam.y = Math.max(SB.y0 + hh, Math.min(SB.y1 - hh, cam.y)); return; }
     cam.x = Math.max(20, Math.min(WW - 20, cam.x)); cam.y = Math.max(20, Math.min(WH - 20, cam.y)); }
@@ -290,19 +298,29 @@
     cx.setTransform(1, 0, 0, 1, 0, 0); cx.imageSmoothingEnabled = false;
     cx.fillStyle = SMODE ? '#2b4a26' : FMODE ? '#1a2e24' : '#2c86d8'; cx.fillRect(0, 0, cv.width, cv.height);
     const z = cam.z * dpr; const [ox, oy] = toScreen(0, 0);
-    if (SMODE) { const L3 = window.__L3 || (window.__L3 = Object.assign(new Image(), { src: 'img/lahan3d.jpg' })); if (L3.complete && L3.naturalWidth) { cx.imageSmoothingEnabled = true; const [a0, b0] = toScreen(0, 50); cx.drawImage(L3, Math.round(a0), Math.round(b0), Math.round(360 * z), Math.round(202.5 * z)); cx.imageSmoothingEnabled = false; } }
+    if (SMODE) { const GR = window.__GR || (window.__GR = Object.assign(new Image(), { src: 'img/rumput.jpg' }));
+      if (GR.complete && GR.naturalWidth) { const pt = cx.createPattern(GR, 'repeat'), [a0, b0] = toScreen(0, 0); pt.setTransform(new DOMMatrix().translate(a0, b0).scale(z * 0.22)); cx.fillStyle = pt; cx.fillRect(0, 0, cv.width, cv.height); }
+      const strip = (p1, p2, w, col) => { const [a1, b1] = toScreen(...p1), [a2, b2] = toScreen(...p2), ww = w * z; cx.strokeStyle = col; cx.lineWidth = ww; cx.lineCap = 'round'; cx.beginPath(); cx.moveTo(a1, b1); cx.lineTo(a2, b2); cx.stroke(); };
+      const R = ROWS();
+      for (let r = 0; r < R; r++) { strip(kAt(-0.6, r + 0.5), kAt(10.6, r + 0.5), 11, '#b98f5a'); strip(kAt(-0.6, r + 0.5), kAt(10.6, r + 0.5), 8, '#d2aa72'); }
+      strip(kAt(5, -0.8), kAt(5, R + 0.6), 13, '#b98f5a'); strip(kAt(5, -0.8), kAt(5, R + 0.6), 10, '#d2aa72'); }
     else cx.drawImage(bg, Math.round(ox), Math.round(oy), Math.round(WW * z), Math.round(WH * z));
     // sea shimmer
     cx.fillStyle = 'rgba(255,255,255,0.35)';
-    if (SMODE && window.SK) { const nEl = document.getElementById('hWarga'), v = nEl && nEl.textContent.trim(), txt = 'WARGA: ' + (v && v !== '—' ? v : '0'), sc = Math.max(1, Math.round(z / 2.2)), w = SK.tw(txt, sc), [a, b2] = toScreen(174.4, 222);
+    if (SMODE && window.SK) { const nEl = document.getElementById('hWarga'), v = nEl && nEl.textContent.trim(), txt = 'WARGA: ' + (v && v !== '—' ? v : '0'), sc = Math.max(1, Math.round(z / 2.2)), w = SK.tw(txt, sc), [a, b2] = toScreen(GATE().x, GATE().y + 4);
       cx.fillStyle = '#1c1c24'; cx.fillRect(Math.round(a - w / 2 - 5 * sc), Math.round(b2 - 3 * sc), w + 10 * sc, 13 * sc); cx.fillStyle = '#7a4a22'; cx.fillRect(Math.round(a - w / 2 - 4 * sc), Math.round(b2 - 2 * sc), w + 8 * sc, 11 * sc); SK.txt(cx, txt, Math.round(a - w / 2), Math.round(b2), sc, '#ffd84a', null); }
     if (!FMODE && !SMODE) for (let i = 0; i < 18; i++) { const x = (rnd(i) * WW + t * (3 + i % 4)) % WW, y = rnd(i * 7) * WH; if (inDia(x, y, ISL, -6)) continue; const [a, b2] = toScreen(x, y); cx.fillRect(Math.round(a), Math.round(b2), Math.round(5 * z), Math.max(1, Math.round(z))); }
     // sprites sorted by y
     const list = P.walkers.slice().sort((a, b) => a.y - b.y);
     let udDrawn = false;
     if (!window.PETA_HIDE) {
-    for (const o of list) { if (!udDrawn && o.y > U.y) { drawUdin(cx, night, t); udDrawn = true; } drawWalker(cx, o, t); }
-    if (!udDrawn) drawUdin(cx, night, t);
+    if (SMODE) { const RI = window.__RI || (window.__RI = Object.assign(new Image(), { src: 'img/rumah3d.png' })), GI = window.__GI || (window.__GI = Object.assign(new Image(), { src: 'img/gerbang3d.png' }));
+      const items = list.map(o => [o.y, () => drawWalker(cx, o, t)]); items.push([U.y, () => drawUdin(cx, night, t)]);
+      if (RI.complete && RI.naturalWidth) for (const h of HS) items.push([h.y, () => { const hh = 36 * z, ww = RI.naturalWidth / RI.naturalHeight * hh, [a, b] = toScreen(h.x, h.y); cx.imageSmoothingEnabled = true; cx.drawImage(RI, Math.round(a - ww / 2), Math.round(b - hh * 0.82), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]);
+      const gt = GATE(); if (GI.complete && GI.naturalWidth) items.push([gt.y, () => { const hh = 50 * z, ww = GI.naturalWidth / GI.naturalHeight * hh, [a, b] = toScreen(gt.x, gt.y); cx.imageSmoothingEnabled = true; cx.drawImage(GI, Math.round(a - ww / 2), Math.round(b - hh), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]);
+      items.sort((p, q) => p[0] - q[0]).forEach(([, f]) => f()); }
+    else { for (const o of list) { if (!udDrawn && o.y > U.y) { drawUdin(cx, night, t); udDrawn = true; } drawWalker(cx, o, t); }
+    if (!udDrawn) drawUdin(cx, night, t); }
     }
     if (FMODE && FANT3.drawTop) FANT3.drawTop(cx, toScreen, cam.z * dpr);
     if (FMODE) { const ph = (t % 45) / 45; if (ph < 0.4) { const k = ph / 0.4, sx = -60 + k * (WW + 120), sy = 260 - k * 220, z = cam.z * dpr, [a, b2] = toScreen(sx, sy);
@@ -361,16 +379,16 @@
   }
 
   window.PETA = {
-    init(canvas) { cv = canvas; cx = cv.getContext('2d'); drawBg(); resize(); cam.z = Math.max(zMin(), 2.6); if (SMODE) cam.y = 175; clampCam(); bindInput(); requestAnimationFrame(frame);
+    init(canvas) { cv = canvas; cx = cv.getContext('2d'); drawBg(); resize(); cam.z = Math.max(zMin(), 2.6); if (SMODE) { cam.z = Math.max(zMin(), 2.2); cam.x = 150; cam.y = 130; } clampCam(); bindInput(); requestAnimationFrame(frame);
       setInterval(() => { if (isKota() === KMODE && isFant() === FMODE) return; KMODE = isKota(); FMODE = isFant(); applyLayout(); g.clearRect(0, 0, WW, WH); drawBg();
         P.walkers.forEach(o => { const s = spot(o.w.no * 2.91 + 9); o.x = o.tx = s.x; o.y = o.ty = s.y; o.home = homeOf(o.w); o.sleep = false; });
         const [ex, ey] = KMODE ? ENTRY() : [HOME.x + 2, HOME.y + 1]; U.x = U.tx = ex; U.y = U.ty = ey; }, 20000); },
-    setWarga(list) { list.forEach(w => addWalker(w, false)); },
-    add(w) { const o = addWalker(w, true); P.hl.add(w.no); setTimeout(() => P.hl.delete(w.no), 15000); return o; },
+    setWarga(list) { list.forEach(w => addWalker(w, false)); houseSpots(P.walkers.length); },
+    add(w) { const o = addWalker(w, true); houseSpots(P.walkers.length); P.hl.add(w.no); setTimeout(() => P.hl.delete(w.no), 15000); return o; },
     focus(no) { const o = P.byNo.get(no); if (!o) return false; P.sel = o; const z0 = cam.z, x0 = cam.x, y0 = cam.y, z1 = Math.max(5, z0), t0 = performance.now();
       const go = ts => { const k = Math.min(1, (ts - t0) / 700), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; cam.x = x0 + (o.x - x0) * e; cam.y = y0 + (o.y - 8 - y0) * e; cam.z = z0 + (z1 - z0) * e; clampCam(); if (k < 1) requestAnimationFrame(go); }; requestAnimationFrame(go); return true; },
     zoom(f) { cam.z *= f; clampCam(); },
-    reset() { cam = { x: ISL.cx, y: SMODE ? 175 : ISL.cy, z: Math.max(zMin(), 2.6) }; clampCam(); P.sel = null; },
+    reset() { const kc = SMODE ? [GATE().x + 34, GATE().y - 62] : [ISL.cx, ISL.cy]; cam = { x: kc[0], y: kc[1], z: Math.max(zMin(), SMODE ? 2.2 : 2.6) }; clampCam(); P.sel = null; },
     showAll(v) { P.showAll = v; },
     onPick(f) { P.onPick = f; },
     onSawit(f) { P.onSawit = f; },
