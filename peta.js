@@ -39,9 +39,9 @@
   const VR = r => Math.floor(r / 2) * 2.7 + (r % 2) * 1.1 + 1.0, VEND = () => VR(ROWS() - 1) + 1;   // 2 baris berhadapan per jalan
   const kCol = i => { const c = i % PERROW; return c >= 5 ? c + 1 : c; };          // kolom 5 = jalan utama
   let HS = [];
-  function houseSpots(n) { HS = []; for (let i = 0; i < n; i++) { const [x, y] = kAt(kCol(i), VR(Math.floor(i / PERROW))); const w = (P.walkers.slice().sort((p, q) => p.w.no - q.w.no)[i] || {}).w; HS.push({ x, y, nama: w ? String(w.nama || '').toUpperCase().slice(0, 16) : '', no: w ? w.no : 0 }); } const [hx, hy] = kAt(5, Math.max(1, Math.ceil(n / PERROW)) - 0.2); Object.assign(HOME, { x: hx, y: hy }); if (typeof U !== 'undefined') { const g = GATE(); const [ux, uy] = kAt(5, VEND() + 1.75); U.x = U.tx = ux; U.y = U.ty = uy; } }
+  function houseSpots(n) { HS = []; for (let i = 0; i < n; i++) { const [x, y] = kAt(kCol(i), VR(Math.floor(i / PERROW))); const w = (P.walkers.slice().sort((p, q) => p.w.no - q.w.no)[i] || {}).w; HS.push({ x, y, nama: w ? String(w.nama || '').toUpperCase().slice(0, 16) : '', no: w ? w.no : 0 }); } const [hx, hy] = kAt(5, Math.max(1, Math.ceil(n / PERROW)) - 0.2); Object.assign(HOME, { x: hx, y: hy }); if (typeof U !== 'undefined') { const g = GATE(); const [ux, uy] = kAt(5, VEND() + 3.0); U.x = U.tx = ux; U.y = U.ty = uy; } }
   const ROWS = () => Math.max(1, Math.ceil(HS.length / PERROW));
-  const GATE = () => { const [x, y] = kAt(5, VEND() + 1.2); return { x, y }; };
+  const GATE = () => { const [x, y] = kAt(5, VEND() + 2.4); return { x, y }; };
   const sLand = (x, y) => x > SB.x0 + 20 && x < SB.x1 - 20 && y > SB.y0 + 20 && y < SB.y1 - 20 && !HS.some(h => Math.abs(h.x - x) < 15 && y < h.y + 3 && y > h.y - 12);
   const onLand = (x, y) => SMODE ? sLand(x, y) : FMODE ? FANT3.walk(x, y) : KMODE ? kWalk(x, y) : (inDia(x, y, ISL, 6) && !inDia(x, y, PLOT, -2) && Math.hypot(x - HOME.x, (y - HOME.y) * 2) > 16);
 
@@ -304,8 +304,9 @@
       if (GR.complete && GR.naturalWidth) { const pt = cx.createPattern(GR, 'repeat'), [a0, b0] = toScreen(0, 0); pt.setTransform(new DOMMatrix().translate(a0, b0).scale(z * 0.22)); cx.fillStyle = pt; cx.fillRect(0, 0, cv.width, cv.height); }
       const strip = (p1, p2, w, col) => { const [a1, b1] = toScreen(...p1), [a2, b2] = toScreen(...p2), ww = w * z; cx.strokeStyle = col; cx.lineWidth = ww; cx.lineCap = 'round'; cx.beginPath(); cx.moveTo(a1, b1); cx.lineTo(a2, b2); cx.stroke(); };
       const R = ROWS();
-      for (let r = 0; r <= R + 1; r += 2) { const v = Math.floor(r / 2) * 2.7 + 0.25; strip(kAt(-0.6, v), kAt(10.6, v), 11, '#b98f5a'); strip(kAt(-0.6, v), kAt(10.6, v), 8, '#d2aa72'); }
-      strip(kAt(5, -0.8), kAt(5, VEND() + 3.2), 13, '#b98f5a'); strip(kAt(5, -0.8), kAt(5, VEND() + 3.2), 10, '#d2aa72'); }
+      const RD = []; for (let r = 0; r <= R + 1; r += 2) { const v = Math.floor(r / 2) * 2.7 + 0.25; RD.push([kAt(-0.6, v), kAt(10.6, v), 0]); }
+      RD.push([kAt(5, -0.4), kAt(5, VEND() + 4.2), 2]);
+      RD.forEach(([p1, p2, e]) => strip(p1, p2, 12 + e, '#b98f5a')); RD.forEach(([p1, p2, e]) => strip(p1, p2, 9 + e, '#d2aa72')); }
     else cx.drawImage(bg, Math.round(ox), Math.round(oy), Math.round(WW * z), Math.round(WH * z));
     // sea shimmer
     cx.fillStyle = 'rgba(255,255,255,0.35)';
