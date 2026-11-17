@@ -36,12 +36,19 @@
   // ===== KOMPLEKS ISOMETRIK: 1 rumah per warga terdaftar, berbaris rapi menghadap jalan =====
   const KU = [34, 17], KV = [-44, 22], KO = [120, -20], PERROW = 10;
   const kAt = (c, r) => [KO[0] + c * KU[0] + r * KV[0], KO[1] + c * KU[1] + r * KV[1]];
-  const VR = r => Math.floor(r / 2) * 2.7 + (r % 2) * 1.1 + 1.0, VEND = () => VR(ROWS() - 1) + 1;   // 2 baris berhadapan per jalan
+  const VR = r => Math.floor(r / 2) * 2.7 + (r % 2) * 1.1 + 1.0, VEND = () => Math.max(VR(ROWS() - 1) + 1, Math.floor((ROWS() + 1) / 2) * 2.7 + 0.25 + 0.9);   // 2 baris berhadapan per jalan
   const kCol = i => { const c = i % PERROW; return c >= 5 ? c + 1 : c; };          // kolom 5 = jalan utama
   let HS = [];
-  function houseSpots(n) { HS = []; for (let i = 0; i < n; i++) { const [x, y] = kAt(kCol(i), VR(Math.floor(i / PERROW))); const w = (P.walkers.slice().sort((p, q) => p.w.no - q.w.no)[i] || {}).w; HS.push({ x, y, nama: w ? String(w.nama || '').toUpperCase().slice(0, 16) : '', no: w ? w.no : 0 }); } const [hx, hy] = kAt(5, Math.max(1, Math.ceil(n / PERROW)) - 0.2); Object.assign(HOME, { x: hx, y: hy }); if (typeof U !== 'undefined') { const g = GATE(); const [ux, uy] = kAt(5, VEND() + 3.0); U.x = U.tx = ux; U.y = U.ty = uy; } }
+  function houseSpots(n) { HS = []; for (let i = 0; i < n; i++) { const [x, y] = kAt(kCol(i), VR(Math.floor(i / PERROW))); const w = (P.walkers.slice().sort((p, q) => p.w.no - q.w.no)[i] || {}).w; HS.push({ x, y, nama: w ? String(w.nama || '').toUpperCase().slice(0, 16) : '', no: w ? w.no : 0 }); } const [hx, hy] = POSXY(); Object.assign(HOME, { x: hx - 2, y: hy - 1 }); if (typeof U !== 'undefined') { const g = GATE(); const [ux, uy] = kAt(5, VEND() + 3.0); U.x = U.tx = ux; U.y = U.ty = uy; } }
   const ROWS = () => Math.max(1, Math.ceil(HS.length / PERROW));
   const GATE = () => { const [x, y] = kAt(5, VEND() + 2.4); return { x, y }; };
+  const POSXY = () => { const RR = ROWS(); let vL = 0; for (let r = 0; r <= RR + 1; r += 2) vL = Math.floor(r / 2) * 2.7 + 0.25; return kAt(6.0, vL + 1.15); };
+  let ZQ = [];
+  function zzz(sx, sy, seed) { const t = performance.now() / 1000, u = Math.max(8, cam.z * dpr * 3.2);
+    cx.save(); cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.lineJoin = 'round';
+    for (let k = 0; k < 3; k++) { const ph = (t * 0.5 + k / 3 + (seed || 0) * 0.37) % 1, x = sx + k * u * 0.55 + Math.sin(t * 2 + k) * u * 0.15, y = sy - ph * u * 2.6, fs = Math.round(u * (0.7 + k * 0.25));
+      cx.globalAlpha = Math.sin(ph * Math.PI); cx.font = 'bold ' + fs + 'px "Silkscreen", monospace'; cx.lineWidth = Math.max(2, fs * 0.22); cx.strokeStyle = '#1c1c24'; cx.strokeText('Z', x, y); cx.fillStyle = '#fff6dc'; cx.fillText('Z', x, y); }
+    cx.restore(); }
   const sLand = (x, y) => x > SB.x0 + 20 && x < SB.x1 - 20 && y > SB.y0 + 20 && y < SB.y1 - 20 && !HS.some(h => Math.abs(h.x - x) < 15 && y < h.y + 3 && y > h.y - 12);
   const onLand = (x, y) => SMODE ? sLand(x, y) : FMODE ? FANT3.walk(x, y) : KMODE ? kWalk(x, y) : (inDia(x, y, ISL, 6) && !inDia(x, y, PLOT, -2) && Math.hypot(x - HOME.x, (y - HOME.y) * 2) > 16);
 
@@ -193,7 +200,7 @@
     const z = cam.z * dpr, [sx, sy] = toScreen(o.x, o.y), s = Math.max(1, Math.round(z));
     if (sx < -20 * s || sy < -30 * s || sx > cv.width + 20 * s || sy > cv.height + 20 * s) return;
     const r = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(sx + x * s), Math.round(sy + y * s), w * s, h * s); };
-    if (SMODE) { const AVM = { COWOK1: 9, COWOK2: 1, COWOK3: 6, CEWEK1: 5, CEWEK2: 2, CEWEK3: 3 }, MIS = [4, 0, 7, 8], ai = AVM[o.w.av] ?? MIS[Math.abs(o.w.no | 0) % 4], im = simg('w/w' + ai); if (!im.complete || !im.naturalWidth) return; const hh = 16 * z, ww = im.naturalWidth / im.naturalHeight * hh, b = o.moving ? Math.abs(Math.sin(t * 9 + o.ph)) * z * 0.8 : 0;
+    if (SMODE) { const AV3 = { COWOK1: 0, COWOK2: 0, COWOK3: 2, CEWEK1: 1, CEWEK2: 1, CEWEK3: 1 }, ai = AV3[o.w.av] ?? [3, 0, 2, 3][Math.abs(o.w.no | 0) % 4], fr = o.moving ? Math.floor(t * 7 + o.ph) % 4 : 0, im = simg('c3/w' + ai + '_' + fr); if (!im.complete || !im.naturalWidth) return; const hh = 11 * z, ww = im.naturalWidth / im.naturalHeight * hh, b = 0;
       c.fillStyle = 'rgba(0,0,0,0.22)'; c.fillRect(Math.round(sx - ww * 0.3), Math.round(sy - z * 0.5), Math.round(ww * 0.6), Math.max(1, Math.round(z)));
       c.save(); c.translate(Math.round(sx), 0); if (o.tx < o.x - 0.3) c.scale(-1, 1); c.drawImage(im, Math.round(-ww / 2), Math.round(sy - hh - b), Math.round(ww), Math.round(hh)); c.restore();
       if (P.sel === o) { c.fillStyle = '#ffd84a'; c.fillRect(Math.round(sx - 2 * z), Math.round(sy - hh - 4 * z), Math.round(4 * z), Math.round(2 * z)); } return; }
@@ -225,8 +232,9 @@
   function drawUdin(c, night, t) {
     const z = cam.z * dpr, [sx, sy] = toScreen(U.x, U.y), s = Math.max(1, Math.round(z));
     const f = U.face, r = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(sx + (f < 0 ? -x - w + 1 : x) * s), Math.round(sy + y * s), w * s, h * s); };
-    if (SMODE) { const nm = U.sleep ? 'w/u_tidur' : U.moving ? 'w/u_j' + (Math.floor(t * 5) % 4) : (U.wait > 0 && U.talk > 0 && Math.floor(t * 3) % 2) ? 'w/u_bicara' : 'w/u_idle', im = simg(nm), bi = simg('w/burung');
-      if (!im.complete || !im.naturalWidth) return; const hh = (U.sleep ? 14 : 19) * z, ww = im.naturalWidth / im.naturalHeight * hh, br = U.moving ? 0 : Math.round(Math.sin(t * 2) * z * 0.3);
+    if (SMODE && U.sleep) { const [px, py] = POSXY(); ZQ.push([px, py, 99]); return; }
+    if (SMODE) { const nm = U.sleep ? 'w/u_tidur' : U.moving ? 'c3/u_jalan' + (Math.floor(t * 7) % 4) : (U.wait > 0 && U.talk > 0) ? (Math.floor(t * 2) % 2 ? 'c3/u_wave' : 'c3/u_point') : 'c3/u_idle', im = simg(nm), bi = { complete: false };
+      if (!im.complete || !im.naturalWidth) return; const hh = (U.sleep ? 9 : 12.5) * z, ww = im.naturalWidth / im.naturalHeight * hh, br = U.moving ? 0 : Math.round(Math.sin(t * 2) * z * 0.3);
       c.fillStyle = 'rgba(0,0,0,0.22)'; c.fillRect(Math.round(sx - ww * 0.3), Math.round(sy - z * 0.5), Math.round(ww * 0.6), Math.max(1, Math.round(z)));
       c.drawImage(im, Math.round(sx - ww / 2), Math.round(sy - hh - br), Math.round(ww), Math.round(hh));
       if (bi.complete && bi.naturalWidth) { const bh = 4.5 * z, bw = bi.naturalWidth / bi.naturalHeight * bh; c.drawImage(bi, Math.round(sx - bw / 2 + (U.sleep ? -2 * z : z * 0.5)), Math.round(sy - hh - br - bh + z * 1.2), Math.round(bw), Math.round(bh)); }
@@ -320,7 +328,10 @@
     if (SMODE) { const RI = window.__RI || (window.__RI = Object.assign(new Image(), { src: 'img/rumah3d.png' })), GI = window.__GI || (window.__GI = Object.assign(new Image(), { src: 'img/gerbang3d.png' }));
       const items = list.map(o => [o.y, () => drawWalker(cx, o, t)]); items.push([U.y, () => drawUdin(cx, night, t)]);
       if (RI.complete && RI.naturalWidth) for (const h of HS) items.push([h.y, () => { const hh = 36 * z, ww = RI.naturalWidth / RI.naturalHeight * hh, [a, b] = toScreen(h.x, h.y); cx.imageSmoothingEnabled = true; cx.drawImage(RI, Math.round(a - ww / 2), Math.round(b - hh * 0.82), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false;
+        { const ow = P.byNo.get(h.no); if (ow && ow.sleep) ZQ.push([h.x, h.y, h.no]); }
         if (h.nama && window.SK && cam.z >= 1.6) { const sc = Math.max(1, Math.round(dpr * (cam.z >= 3 ? 2 : 1))), tw = SK.tw(h.nama, sc), y = Math.round(b - hh * 0.86 - 11 * sc); cx.fillStyle = 'rgba(28,28,36,0.85)'; cx.fillRect(Math.round(a - tw / 2 - 3 * sc), y - 2 * sc, tw + 6 * sc, 11 * sc); SK.txt(cx, h.nama, Math.round(a - tw / 2), y, sc, '#ffffff', null); } }]);
+      const PI = window.__PI || (window.__PI = Object.assign(new Image(), { src: 'img/pos3d.png' }));
+      if (PI.complete && PI.naturalWidth) { const RR = ROWS(); let vL = 0; for (let r = 0; r <= RR + 1; r += 2) vL = Math.floor(r / 2) * 2.7 + 0.25; for (const v of [vL]) { const [px, py] = kAt(6.0, v + 1.15); items.push([py, () => { const hh = 34 * z, ww = PI.naturalWidth / PI.naturalHeight * hh, [a, b] = toScreen(px, py); cx.imageSmoothingEnabled = true; cx.drawImage(PI, Math.round(a - ww / 2), Math.round(b - hh * 0.85), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]); } }
       const gt = GATE(); if (GI.complete && GI.naturalWidth) items.push([gt.y, () => { const hh = 62 * z, ww = GI.naturalWidth / GI.naturalHeight * hh, [a, b] = toScreen(gt.x, gt.y); cx.imageSmoothingEnabled = true; cx.drawImage(GI, Math.round(a - ww * 0.46), Math.round(b - hh * 0.8), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]);
       items.sort((p, q) => p[0] - q[0]).forEach(([, f]) => f()); }
     else { for (const o of list) { if (!udDrawn && o.y > U.y) { drawUdin(cx, night, t); udDrawn = true; } drawWalker(cx, o, t); }
@@ -357,6 +368,7 @@
     let n = 0;
     if (cam.z >= 4 || P.showAll) for (const o of list) { if (strong.has(o)) continue; const [a, b2] = toScreen(o.x, o.y); if (a < 0 || b2 < 0 || a > cv.width || b2 > cv.height) continue; if (++n > (P.showAll ? 400 : 60)) break; label(cx, o, false); }
     strong.forEach(o => label(cx, o, true));
+    { const z0 = cam.z * dpr; for (const [x, y, sd] of ZQ) { const [a, b] = toScreen(x, y); zzz(a + 6 * z0, b - 30 * z0, sd); } ZQ = []; }
     udinLabel(cx); udinBubble(cx);
     requestAnimationFrame(frame);
   }
