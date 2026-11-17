@@ -57,7 +57,7 @@
 
   // ---------- stats ----------
   function renderStats() {
-    const s0 = ST.stats || {}, YT_LAMA = 4100;   // batas subscriber YouTube lama (per 14 Nov 2026), hanya pertambahan setelahnya dihitung
+    const s0 = ST.stats || {}, YT_LAMA = 4000;   // batas subscriber YouTube lama (4.000), hanya pertambahan setelahnya dihitung
     const s = Object.assign({}, s0, { youtube: Math.max(0, (s0.youtube || 0) - YT_LAMA) }), total = (s.ig || 0) + (s.tiktok || 0) + (s.youtube || 0);
     if (FANT()) { const st = document.querySelector('#sTotal + .s'); if (st) st.textContent = 'warga yang selamat'; const k = document.querySelector('#sTotal') && document.querySelector('#sTotal').previousElementSibling; if (k) k.textContent = 'WARGA HIDUP'; }
     $('hWarga').textContent = fmt(total); $('hBangunan').textContent = fmt(s.bangunan); $('hKoin').textContent = fmt(s.koin);
