@@ -319,7 +319,7 @@
       RD.push([kAt(5, -0.4), kAt(5, VEND() + 4.2), 2]);
       RD.forEach(([p1, p2, e]) => strip(p1, p2, 12 + e, '#b98f5a')); RD.forEach(([p1, p2, e]) => strip(p1, p2, 9 + e, '#d2aa72'));
       const quad = (c0, r0, c1, r1, fill, line) => { const P = [kAt(c0, r0), kAt(c1, r0), kAt(c1, r1), kAt(c0, r1)].map(q => toScreen(...q)); cx.beginPath(); P.forEach(([a, b], i) => i ? cx.lineTo(a, b) : cx.moveTo(a, b)); cx.closePath(); cx.fillStyle = fill; cx.fill(); if (line) { cx.strokeStyle = line; cx.lineWidth = Math.max(1, z * 0.6); cx.stroke(); } };
-      for (const h of HS) quad(h.c - 0.42, h.r - 0.48, h.c + 0.42, h.r + 0.42, 'rgba(124,194,90,0.85)', 'rgba(240,232,210,0.9)');
+      if (window.SIKEPO_KAVLING) for (const h of HS) quad(h.c - 0.42, h.r - 0.48, h.c + 0.42, h.r + 0.42, 'rgba(124,194,90,0.85)', 'rgba(240,232,210,0.9)');
       { const [pc, pr] = [6.0, Math.floor((R + 1) / 2) * 2.7 + 0.25 + 1.15]; quad(pc - 0.5, pr - 0.55, pc + 0.5, pr + 0.4, 'rgba(176,170,156,0.9)', 'rgba(240,232,210,0.9)'); quad(pc - 2.55, pr - 0.65, pc - 1.45, pr + 0.4, 'rgba(176,170,156,0.9)', 'rgba(240,232,210,0.9)'); } }
     else cx.drawImage(bg, Math.round(ox), Math.round(oy), Math.round(WW * z), Math.round(WH * z));
     // sea shimmer
@@ -331,9 +331,9 @@
     const list = P.walkers.slice().sort((a, b) => a.y - b.y);
     let udDrawn = false;
     if (!window.PETA_HIDE) {
-    if (SMODE) { const RV = window.__RV || (window.__RV = [0, 1, 2, 3, 4, 5].map(k => Object.assign(new Image(), { src: 'img/rumah3d_v' + k + '.png' }))), RI = RV[0], GI = window.__GI || (window.__GI = Object.assign(new Image(), { src: 'img/gerbang3d.png' }));
+    if (SMODE) { const RV = window.__RV || (window.__RV = ['v0', 'v1', 'v2', 'v3', 'v4', 'v5', '2lt', 'kayu'].map(k => Object.assign(new Image(), { src: 'img/rumah3d_' + k + '.png' }))), RI = RV[0], GI = window.__GI || (window.__GI = Object.assign(new Image(), { src: 'img/gerbang3d.png' }));
       const items = list.map(o => [o.y, () => drawWalker(cx, o, t)]); items.push([U.y, () => drawUdin(cx, night, t)]);
-      if (RI.complete && RI.naturalWidth) for (const h of HS) items.push([h.y, () => { const hh = 36 * z, ww = RI.naturalWidth / RI.naturalHeight * hh, [a, b] = toScreen(h.x, h.y); cx.imageSmoothingEnabled = true; { const vi = (Math.abs(h.no | 0) * 7 + 3) % 12, im = RV[vi % 6].complete && RV[vi % 6].naturalWidth ? RV[vi % 6] : RI; cx.save(); cx.translate(Math.round(a), 0); if (vi >= 6) cx.scale(-1, 1); cx.drawImage(im, Math.round(-ww / 2), Math.round(b - hh * 0.82), Math.round(ww), Math.round(hh)); cx.restore(); } cx.imageSmoothingEnabled = false;
+      if (RI.complete && RI.naturalWidth) for (const h of HS) items.push([h.y, () => { const hh = 36 * z, ww = RI.naturalWidth / RI.naturalHeight * hh, [a, b] = toScreen(h.x, h.y); cx.imageSmoothingEnabled = true; { const nn = Math.abs(h.no | 0), md = nn % 3, vi = md === 0 ? 6 : md === 1 ? 7 : (nn * 7 + 3) % 6, fl = (nn >> 2) % 2 === 1, im = RV[vi].complete && RV[vi].naturalWidth ? RV[vi] : RI; cx.save(); cx.translate(Math.round(a), 0); if (fl) cx.scale(-1, 1); cx.drawImage(im, Math.round(-ww / 2), Math.round(b - hh * 0.82), Math.round(ww), Math.round(hh)); cx.restore(); } cx.imageSmoothingEnabled = false;
         { const ow = P.byNo.get(h.no); if (ow && ow.sleep) ZQ.push([h.x, h.y, h.no]); }
         if (h.nama && window.SK && cam.z >= 1.6) { const sc = Math.max(1, Math.round(dpr * (cam.z >= 3 ? 2 : 1))), tw = SK.tw(h.nama, sc), y = Math.round(b - hh * 0.86 - 11 * sc); cx.fillStyle = 'rgba(28,28,36,0.85)'; cx.fillRect(Math.round(a - tw / 2 - 3 * sc), y - 2 * sc, tw + 6 * sc, 11 * sc); SK.txt(cx, h.nama, Math.round(a - tw / 2), y, sc, '#ffffff', null); } }]);
       const PI = window.__PI || (window.__PI = Object.assign(new Image(), { src: 'img/pos3d.png' }));
