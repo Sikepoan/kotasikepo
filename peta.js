@@ -118,7 +118,7 @@
   const SHIRT = { COWOK1: '#d23a2a', COWOK2: '#3f9b4a', COWOK3: '#ffd84a', CEWEK1: '#7a4fd0', CEWEK2: '#f08a2a', CEWEK3: '#2aa89a' };
   const SKIN = { COWOK3: '#a8683c' };
   function spot(seed) { if (KMODE && WT.length) { const [a, b] = WT[Math.floor(rnd(seed * 5.7) * WT.length)], [x, y] = KOTA3.tw(a, b); return { x: x + Math.round((rnd(seed) - 0.5) * 6), y: y + Math.round((rnd(seed * 2) - 0.5) * 3) }; } for (let k = 0; k < 40; k++) { const x = ISL.cx + (rnd(seed * 7.1 + k) * 2 - 1) * ISL.hw, y = ISL.cy + (rnd(seed * 3.3 + k * 1.7) * 2 - 1) * ISL.hh; if (onLand(x, y)) return { x, y }; } return { x: ISL.cx - 40, y: ISL.cy + 20 }; }
-  const P = { walkers: [], byNo: new Map(), sel: null, hl: new Set(), showAll: false, onPick: null };
+  const P = { walkers: [], byNo: new Map(), sel: null, hl: new Set(), showAll: false, onPick: null, follow: null };
   const homeOf = w => FMODE ? FANT3.huddle(w.no) : KMODE ? KOTA3.doors[w.no % KOTA3.doors.length] : spot(w.no * 1.37 + 0.5);
   function addWalker(w, fresh) {
     if (P.byNo.has(w.no)) return P.byNo.get(w.no);
@@ -305,6 +305,9 @@
     const t = ts / 1000, dt = Math.min(0.1, (ts - last) / 1000 || 0.016); last = ts;
     const h = window.SIKEPO_FORCE_HOUR ?? wibHour(), night = nightK(h);
     step(dt, night); stepUdin(dt, t, night); stepWx(dt, t);
+    if (P.follow) { const f = P.follow === 'U' ? U : P.follow, k = 1 - Math.exp(-dt * 4); cam.x += (f.x - cam.x) * k; cam.y += (f.y - 8 - cam.y) * k; cam.z += (Math.max(cam.z, 5) - cam.z) * k * 0.5; clampCam(); }
+    { let b = document.getElementById('droneBadge'); if (!b) { b = document.createElement('button'); b.id = 'droneBadge'; b.type = 'button'; b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(76px + env(safe-area-inset-top,0px));z-index:45;font:10px var(--display,monospace);padding:8px 12px;border:3px solid #1c1c24;background:#c8302a;color:#fff;box-shadow:3px 3px 0 #1c1c24;cursor:pointer'; b.onclick = () => { P.follow = null; }; document.body.append(b); }
+      const on = !!P.follow; b.hidden = !on; if (on) { const nm = P.follow === 'U' ? 'WALI KOTA UDIN' : String(P.follow.w.nama || 'WARGA').toUpperCase().slice(0, 16); const txt = '● DRONE: ' + nm + '  ✕'; if (b.textContent !== txt) b.textContent = txt; } }
     cx.setTransform(1, 0, 0, 1, 0, 0); cx.imageSmoothingEnabled = false;
     cx.fillStyle = SMODE ? '#2b4a26' : FMODE ? '#1a2e24' : '#2c86d8'; cx.fillRect(0, 0, cv.width, cv.height);
     const z = cam.z * dpr; const [ox, oy] = toScreen(0, 0);
@@ -382,15 +385,15 @@
     cv.addEventListener('pointermove', e => {
       if (!pts.has(e.pointerId)) return; const p = pts.get(e.pointerId), dx = e.clientX - p[0], dy = e.clientY - p[1]; pts.set(e.pointerId, [e.clientX, e.clientY]);
       if (pts.size === 2 && pinch0) { const [a, b] = [...pts.values()]; cam.z = pinch0.z * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch0.d; clampCam(); moved += 10; return; }
-      cam.x -= dx / cam.z; cam.y -= dy / cam.z; moved += Math.abs(dx) + Math.abs(dy); clampCam();
+      if (Math.abs(dx) + Math.abs(dy) > 3) P.follow = null; cam.x -= dx / cam.z; cam.y -= dy / cam.z; moved += Math.abs(dx) + Math.abs(dy); clampCam();
     });
     const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch0 = null;
       if (moved < (e.pointerType === 'touch' ? 14 : 6) && e.type === 'pointerup') { const r = cv.getBoundingClientRect(), [wx, wy] = toWorld(e.clientX - r.left, e.clientY - r.top); let best = null, bd = 9 / Math.max(1, cam.z / 3);
-        if (Math.hypot(U.x - wx, (U.y - 7) - wy) < Math.max(6, 10 / Math.max(1, cam.z / 3))) { sapa(); return; }
+        if (Math.hypot(U.x - wx, (U.y - 7) - wy) < Math.max(6, 10 / Math.max(1, cam.z / 3))) { sapa(); P.follow = 'U'; return; }
         for (const o of P.walkers) { const d = Math.hypot(o.x - wx, (o.y - 5) - wy); if (d < bd) { bd = d; best = o; } }
         if (FMODE && P.onTavern && window.FANT3 && FANT3.tavern() >= 4) { const C = FANT3.CAMP; if (Math.abs(wx - C.x) < 40 && wy > C.y - 76 && wy < C.y + 14) { P.onTavern(); return; } }
         if (!best && inDia(wx, wy + 4, PLOT, -4) && P.onSawit) { P.onSawit(); return; }
-        P.sel = best; P.onPick && P.onPick(best ? best.w : null); } };
+        P.sel = best; P.follow = best || null; P.onPick && P.onPick(best ? best.w : null); } };
     cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
     cv.addEventListener('wheel', e => { e.preventDefault(); const r = cv.getBoundingClientRect(), [wx, wy] = toWorld(e.clientX - r.left, e.clientY - r.top); const z0 = cam.z; cam.z *= e.deltaY < 0 ? 1.15 : 1 / 1.15; clampCam(); const k = 1 - z0 / cam.z; cam.x += (wx - cam.x) * k; cam.y += (wy - cam.y) * k; clampCam(); }, { passive: false });
     window.addEventListener('resize', resize);
@@ -403,7 +406,7 @@
         const [ex, ey] = KMODE ? ENTRY() : [HOME.x + 2, HOME.y + 1]; U.x = U.tx = ex; U.y = U.ty = ey; }, 20000); },
     setWarga(list) { list.forEach(w => addWalker(w, false)); houseSpots(P.walkers.length); },
     add(w) { const o = addWalker(w, true); houseSpots(P.walkers.length); P.hl.add(w.no); setTimeout(() => P.hl.delete(w.no), 15000); return o; },
-    focus(no) { const o = P.byNo.get(no); if (!o) return false; P.sel = o; const z0 = cam.z, x0 = cam.x, y0 = cam.y, z1 = Math.max(5, z0), t0 = performance.now();
+    focus(no) { const o = P.byNo.get(no); if (!o) return false; P.sel = o; P.follow = o; const z0 = cam.z, x0 = cam.x, y0 = cam.y, z1 = Math.max(5, z0), t0 = performance.now();
       const go = ts => { const k = Math.min(1, (ts - t0) / 700), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; cam.x = x0 + (o.x - x0) * e; cam.y = y0 + (o.y - 8 - y0) * e; cam.z = z0 + (z1 - z0) * e; clampCam(); if (k < 1) requestAnimationFrame(go); }; requestAnimationFrame(go); return true; },
     zoom(f) { cam.z *= f; clampCam(); },
     reset() { const kc = SMODE ? [GATE().x + 10, GATE().y - 50] : [ISL.cx, ISL.cy]; cam = { x: kc[0], y: kc[1], z: Math.max(zMin(), SMODE ? 2.2 : 2.6) }; clampCam(); P.sel = null; },
