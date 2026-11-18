@@ -188,12 +188,30 @@
   function roadStep(o, dt) {
     if (!o.rn) { const V = roadNodes(); o.rn = { c: 5, v: V[Math.floor(rnd(o.w.no * 3.1) * V.length)] }; o.pn = null; o.lane = rnd(o.w.no) < 0.5 ? -1 : 1; const [x, y] = kAt(o.rn.c + (rnd(o.w.no * 7) - 0.5) * 8, o.rn.v + o.lane * 0.07); o.x = x; o.y = y; o.rn = { c: Math.abs(x) < 0 ? 5 : (rnd(o.w.no * 7) < 0.5 ? -0.6 : 10.6), v: o.rn.v }; o.pn = { c: 5, v: o.rn.v }; }
     const [tx, ty] = laneXY(o, o.rn.c, o.rn.v), dx = tx - o.x, dy = ty - o.y, d = Math.hypot(dx, dy);
-    if (d < 0.8) { if (Math.random() < 0.25 && Math.abs(o.rn.c - 5) > 0.01) { o.wait = 1 + Math.random() * 2; } nextNode(o); return; }
+    if (d < 0.8) { if (tryWarung(o)) return; if (Math.random() < 0.25 && Math.abs(o.rn.c - 5) > 0.01) { o.wait = 1 + Math.random() * 2; } nextNode(o); return; }
     const sp = 7 + (o.w.no % 3), v = Math.min(d, sp * dt); o.x += dx / d * v; o.y += dy / d * v; o.moving = true; o.face = dx < 0 ? -1 : 1; }
+  // ===== interaksi NPC: nongkrong & makan di warung, ngobrol saat berpapasan =====
+  const WARUNG_TALK = ['BU, NASI SATU YA!', 'KOPI SATU!', 'ENAK BANGET INI', 'KAPAN BANGUN SEKOLAH?', 'GW MAU JADI WAKIL WALIKOTA', 'GRATIS GAK NIH?', 'HAHAHA', 'RUMAH LO YANG MANA?', 'PAK UDIN KEMANA YA?', 'KENYANG...', 'BESOK BANGUN APA YA?', 'KEPO DEH'];
+  const ROAD_TALK = [['HALO TETANGGA!', 'HALO JUGA!'], ['MAU KE MANA?', 'KE WARUNG DONG'], ['UDAH MAKAN?', 'BELUM NIH'], ['RUMAH BARU YA?', 'IYA DONG'], ['ADA GOSIP APA?', 'KEPO AJA LO']];
+  const SEATS = [[-0.42, 0.42], [-0.22, 0.5], [-0.02, 0.56], [0.18, 0.5], [-0.5, 0.18], [0.3, 0.32]];
+  const seatTaken = []; const WXY = () => { const V = roadNodes(); return [4.0, V[V.length - 1] + 1.05]; };
+  window.__wxy = () => kAt(...WXY()); window.__seat = () => seatTaken.filter(Boolean).length;
+  function say(o, txt, dur) { o.say = txt; o.sayT = performance.now() / 1000 + (dur || 3); }
+  function warungStep(o, dt) { const t = performance.now() / 1000, [wc, wv] = WXY(), [sc, sv] = SEATS[o.seat], [tx, ty] = kAt(wc + sc, wv + sv), dx = tx - o.x, dy = ty - o.y, d = Math.hypot(dx, dy);
+    if (d > 0.6 && !o.seated) { const v = Math.min(d, 7 * dt); o.x += dx / d * v; o.y += dy / d * v; o.moving = true; o.face = dx < 0 ? -1 : 1; return; }
+    o.seated = true; o.moving = false; o.face = sc < 0 ? 1 : -1; o.eat -= dt;
+    if (!o.say || t > o.sayT + 2 + rnd(o.w.no + Math.floor(t)) * 4) say(o, WARUNG_TALK[Math.floor(Math.random() * WARUNG_TALK.length)], 3);
+    if (o.eat <= 0) { seatTaken[o.seat] = null; o.state = null; o.seated = false; o.seat = null; const V = roadNodes(); o.rn = { c: 5, v: V[V.length - 1] }; o.pn = null; say(o, 'DADAH!', 1.5); } }
+  function tryWarung(o) { const V = roadNodes(); if (!(Math.abs(o.rn.c - 5) < 0.01 && Math.abs(o.rn.v - V[V.length - 1]) < 0.01) || Math.random() > 0.45) return false;
+    const free = SEATS.map((_, i) => i).filter(i => !seatTaken[i]); if (!free.length) return false; o.seat = free[Math.floor(Math.random() * free.length)]; seatTaken[o.seat] = o; o.state = 'warung'; o.eat = 8 + Math.random() * 10; return true; }
+  function chatCheck(dt) { if (Math.random() > dt * 0.6) return; const L = P.walkers.filter(o => !o.state && o.moving && !o.sleep); if (L.length < 2) return; const a = L[Math.floor(Math.random() * L.length)];
+    const b = L.find(o => o !== a && Math.hypot(o.x - a.x, o.y - a.y) < 14); if (!b) return; const pr = ROAD_TALK[Math.floor(Math.random() * ROAD_TALK.length)];
+    a.wait = b.wait = 3.2; a.moving = b.moving = false; a.face = b.x < a.x ? -1 : 1; b.face = -a.face; say(a, pr[0], 1.6); setTimeout(() => say(b, pr[1], 1.6), 1500); }
   function step(dt, night) {
+    if (SMODE && night <= 0.6) chatCheck(dt);
     for (const o of P.walkers) {
       if (night > 0.6) {   // malam: pulang ke tikar sendiri & tidur
-        if (SMODE) { const h = HS.find(q => q.no === o.w.no); if (h) o.home = { x: h.x + 6, y: h.y + 4 }; }
+        if (SMODE) { if (o.state) { seatTaken[o.seat] = null; o.state = null; o.seated = false; } const h = HS.find(q => q.no === o.w.no); if (h) o.home = { x: h.x + 6, y: h.y + 4 }; }
         const dx = o.home.x - o.x, dy = o.home.y - o.y, d = Math.hypot(dx, dy);
         if (d > 0.6) { const v = Math.min(d, 14 * dt); o.x += dx / d * v; o.y += dy / d * v; o.moving = true; } else o.moving = false;
         o.sleep = d <= 0.6; continue;
@@ -205,7 +223,7 @@
       if (KMODE) { const dx = o.tx - o.x, dy = o.ty - o.y, d = Math.hypot(dx, dy);
         if (d < 0.8) { const n = kNext(o); o.tx = n.x; o.ty = n.y; if (Math.random() < 0.15) o.wait = 1 + Math.random() * 3; continue; }
         const v = Math.min(d, 9 * dt); o.x += dx / d * v; o.y += dy / d * v; o.moving = true; continue; }
-      if (SMODE) { roadStep(o, dt); continue; }
+      if (SMODE) { if (o.state === 'warung') { warungStep(o, dt); continue; } roadStep(o, dt); continue; }
       const dx = o.tx - o.x, dy = o.ty - o.y, d = Math.hypot(dx, dy);
       if (d < 0.8) { const n = spot(o.w.no * 1.1 + performance.now() * 0.0013 % 97); o.tx = n.x; o.ty = n.y; o.wait = 1 + rnd(o.x) * 4; continue; }
       const v = Math.min(d, 9 * dt), nx = o.x + dx / d * v, ny = o.y + dy / d * v;
@@ -219,6 +237,8 @@
     if (SMODE) { const AVM = { COWOK1: 9, COWOK2: 1, COWOK3: 6, CEWEK1: 5, CEWEK2: 2, CEWEK3: 3 }, MIS = [4, 0, 7, 8], ai = AVM[o.w.av] ?? MIS[Math.abs(o.w.no | 0) % 4], im = simg('w/w' + ai); if (!im.complete || !im.naturalWidth) return; const hh = 9 * z, ww = im.naturalWidth / im.naturalHeight * hh, b = o.moving ? Math.abs(Math.sin(t * 9 + o.ph)) * z * 0.6 : 0;
       c.fillStyle = 'rgba(0,0,0,0.22)'; c.fillRect(Math.round(sx - ww * 0.3), Math.round(sy - z * 0.5), Math.round(ww * 0.6), Math.max(1, Math.round(z)));
       c.save(); c.translate(Math.round(sx), 0); if (o.tx < o.x - 0.3) c.scale(-1, 1); c.drawImage(im, Math.round(-ww / 2), Math.round(sy - hh - b), Math.round(ww), Math.round(hh)); c.restore();
+      if (o.say && performance.now() / 1000 < o.sayT && window.SK && cam.z >= 2) { const sc = Math.max(1, Math.round(dpr * (cam.z >= 5 ? 2 : 1))), tw = SK.tw(o.say, sc), bx = Math.round(sx - tw / 2 - 4 * sc), by = Math.round(sy - hh - b - 16 * sc);
+        c.fillStyle = '#1c1c24'; c.fillRect(bx - sc, by - sc, tw + 10 * sc, 13 * sc); c.fillStyle = '#ffffff'; c.fillRect(bx, by, tw + 8 * sc, 11 * sc); c.fillRect(Math.round(sx - sc), by + 11 * sc, 2 * sc, 3 * sc); SK.txt(c, o.say, bx + 4 * sc, by + 2 * sc, sc, '#1c1c24', null); }
       if (P.sel === o) { c.fillStyle = '#ffd84a'; c.fillRect(Math.round(sx - 2 * z), Math.round(sy - hh - 4 * z), Math.round(4 * z), Math.round(2 * z)); } return; }
     const tk = o.w.kat === 'TUKANG', av = o.w.av || 'MISTERI', skin = SKIN[av] || '#f4b47c', hair = HAIR[av] || '#1c1c24';
     if (o.sleep && (KMODE || (SMODE && HS.some(q => q.no === o.w.no)))) return;   // tidur di dalam rumah
