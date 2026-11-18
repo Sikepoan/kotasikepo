@@ -176,6 +176,20 @@
     const v = Math.min(d, 7 * dt), nx = U.x + dx / d * v, ny = U.y + dy / d * v;
     if (landU(nx, ny)) { U.x = nx; U.y = ny; U.moving = true; U.face = dx < 0 ? -1 : 1; } else { U.tx = HOME.x + 2; U.ty = HOME.y + 1; }
   }
+  // jaringan jalan ala city-builder: simpul di persimpangan & ujung jalan blok, jalur kiri (lane) di trotoar
+  function roadNodes() { const R = ROWS(), V = []; for (let r = 0; r <= R + 1; r += 2) V.push(Math.floor(r / 2) * 2.7 + 0.25); return V; }
+  function nextNode(o) { const V = roadNodes(), cs = [-0.6, 5, 10.6], { c, v } = o.rn, opts = [];
+    const vi = V.findIndex(q => Math.abs(q - v) < 0.01);
+    if (Math.abs(c - 5) < 0.01) { if (vi > 0) opts.push({ c: 5, v: V[vi - 1] }); if (vi < V.length - 1) opts.push({ c: 5, v: V[vi + 1] }); opts.push({ c: -0.6, v }, { c: 10.6, v }); }
+    else opts.push({ c: 5, v });
+    const back = opts.filter(q => !(o.pn && Math.abs(q.c - o.pn.c) < 0.01 && Math.abs(q.v - o.pn.v) < 0.01));
+    const pick = (back.length ? back : opts)[Math.floor(Math.random() * (back.length ? back.length : opts.length))]; o.pn = o.rn; o.rn = pick; return pick; }
+  function laneXY(o, c, v) { const hor = Math.abs(o.rn.v - (o.pn ? o.pn.v : o.rn.v)) < 0.01, side = o.lane; return kAt(c + (hor ? 0 : side * 0.06), v + (hor ? side * 0.07 : 0)); }
+  function roadStep(o, dt) {
+    if (!o.rn) { const V = roadNodes(); o.rn = { c: 5, v: V[Math.floor(rnd(o.w.no * 3.1) * V.length)] }; o.pn = null; o.lane = rnd(o.w.no) < 0.5 ? -1 : 1; const [x, y] = kAt(o.rn.c + (rnd(o.w.no * 7) - 0.5) * 8, o.rn.v + o.lane * 0.07); o.x = x; o.y = y; o.rn = { c: Math.abs(x) < 0 ? 5 : (rnd(o.w.no * 7) < 0.5 ? -0.6 : 10.6), v: o.rn.v }; o.pn = { c: 5, v: o.rn.v }; }
+    const [tx, ty] = laneXY(o, o.rn.c, o.rn.v), dx = tx - o.x, dy = ty - o.y, d = Math.hypot(dx, dy);
+    if (d < 0.8) { if (Math.random() < 0.25 && Math.abs(o.rn.c - 5) > 0.01) { o.wait = 1 + Math.random() * 2; } nextNode(o); return; }
+    const sp = 7 + (o.w.no % 3), v = Math.min(d, sp * dt); o.x += dx / d * v; o.y += dy / d * v; o.moving = true; o.face = dx < 0 ? -1 : 1; }
   function step(dt, night) {
     for (const o of P.walkers) {
       if (night > 0.6) {   // malam: pulang ke tikar sendiri & tidur
@@ -185,11 +199,13 @@
         o.sleep = d <= 0.6; continue;
       }
       if (KMODE && o.sleep) { o.sleep = false; const n = kNext(o); o.tx = n.x; o.ty = n.y; }
+      if (SMODE && o.sleep) { o.rn = null; }
       o.sleep = false;
       if (o.wait > 0) { o.wait -= dt; o.moving = false; continue; }
       if (KMODE) { const dx = o.tx - o.x, dy = o.ty - o.y, d = Math.hypot(dx, dy);
         if (d < 0.8) { const n = kNext(o); o.tx = n.x; o.ty = n.y; if (Math.random() < 0.15) o.wait = 1 + Math.random() * 3; continue; }
         const v = Math.min(d, 9 * dt); o.x += dx / d * v; o.y += dy / d * v; o.moving = true; continue; }
+      if (SMODE) { roadStep(o, dt); continue; }
       const dx = o.tx - o.x, dy = o.ty - o.y, d = Math.hypot(dx, dy);
       if (d < 0.8) { const n = spot(o.w.no * 1.1 + performance.now() * 0.0013 % 97); o.tx = n.x; o.ty = n.y; o.wait = 1 + rnd(o.x) * 4; continue; }
       const v = Math.min(d, 9 * dt), nx = o.x + dx / d * v, ny = o.y + dy / d * v;
@@ -319,7 +335,10 @@
       RD.push([kAt(5, -0.4), kAt(5, VEND() + 4.2), 2]);
       RD.forEach(([p1, p2, e]) => strip(p1, p2, 12 + e, '#b98f5a')); RD.forEach(([p1, p2, e]) => strip(p1, p2, 9 + e, '#d2aa72'));
       const quad = (c0, r0, c1, r1, fill, line) => { const P = [kAt(c0, r0), kAt(c1, r0), kAt(c1, r1), kAt(c0, r1)].map(q => toScreen(...q)); cx.beginPath(); P.forEach(([a, b], i) => i ? cx.lineTo(a, b) : cx.moveTo(a, b)); cx.closePath(); cx.fillStyle = fill; cx.fill(); if (line) { cx.strokeStyle = line; cx.lineWidth = Math.max(1, z * 0.6); cx.stroke(); } };
-      if (window.SIKEPO_KAVLING) for (const h of HS) quad(h.c - 0.42, h.r - 0.48, h.c + 0.42, h.r + 0.42, 'rgba(124,194,90,0.85)', 'rgba(240,232,210,0.9)');
+      for (const h of HS) { quad(h.c - 0.46, h.r - 0.5, h.c + 0.46, h.r + 0.46, 'rgba(96,170,70,0.75)', 'rgba(70,130,50,0.6)');
+        const up = (h.r % 2.7) > 1.5, ve = up ? h.r + 0.46 : h.r - 0.5, vr = up ? h.r + 0.62 : h.r - 0.66; quad(h.c - 0.07, Math.min(ve, vr), h.c + 0.07, Math.max(ve, vr), 'rgba(200,190,170,0.95)');
+        for (let k = 0; k < 6; k++) { const sd = (h.no || 1) * 31 + k * 17, fc = h.c + (((sd * 37) % 80) / 100 - 0.4), fv = h.r + (((sd * 53) % 80) / 100 - 0.42); if (Math.abs(fc - h.c) < 0.16) continue;
+          const [a, b] = toScreen(...kAt(fc, fv)), rr = Math.max(1.5, z * 1.3); cx.fillStyle = k % 3 === 0 ? '#3f8f3a' : ['#ff6b8a', '#ffd84a', '#ffffff', '#c86bff'][sd % 4]; cx.beginPath(); cx.arc(a, b, k % 3 === 0 ? rr * 1.8 : rr, 0, 7); cx.fill(); } }
       { const [pc, pr] = [6.0, Math.floor((R + 1) / 2) * 2.7 + 0.25 + 1.15]; quad(pc - 0.5, pr - 0.55, pc + 0.5, pr + 0.4, 'rgba(176,170,156,0.9)', 'rgba(240,232,210,0.9)'); quad(pc - 2.55, pr - 0.65, pc - 1.45, pr + 0.4, 'rgba(176,170,156,0.9)', 'rgba(240,232,210,0.9)'); } }
     else cx.drawImage(bg, Math.round(ox), Math.round(oy), Math.round(WW * z), Math.round(WH * z));
     // sea shimmer
