@@ -328,18 +328,27 @@
     cx.fillStyle = SMODE ? '#2b4a26' : FMODE ? '#1a2e24' : '#2c86d8'; cx.fillRect(0, 0, cv.width, cv.height);
     const z = cam.z * dpr; const [ox, oy] = toScreen(0, 0);
     if (SMODE) { const GR = window.__GR || (window.__GR = Object.assign(new Image(), { src: 'img/rumput.jpg' }));
-      if (GR.complete && GR.naturalWidth) { const pt = cx.createPattern(GR, 'repeat'), [a0, b0] = toScreen(0, 0); pt.setTransform(new DOMMatrix().translate(a0, b0).scale(z * 0.22)); cx.fillStyle = pt; cx.fillRect(0, 0, cv.width, cv.height); }
-      const strip = (p1, p2, w, col) => { const [a1, b1] = toScreen(...p1), [a2, b2] = toScreen(...p2), ww = w * z; cx.strokeStyle = col; cx.lineWidth = ww; cx.lineCap = 'round'; cx.beginPath(); cx.moveTo(a1, b1); cx.lineTo(a2, b2); cx.stroke(); };
-      const R = ROWS();
-      const RD = []; for (let r = 0; r <= R + 1; r += 2) { const v = Math.floor(r / 2) * 2.7 + 0.25; RD.push([kAt(-0.6, v), kAt(10.6, v), 0]); }
-      RD.push([kAt(5, -0.4), kAt(5, VEND() + 4.2), 2]);
-      RD.forEach(([p1, p2, e]) => strip(p1, p2, 12 + e, '#b98f5a')); RD.forEach(([p1, p2, e]) => strip(p1, p2, 9 + e, '#d2aa72'));
-      const quad = (c0, r0, c1, r1, fill, line) => { const P = [kAt(c0, r0), kAt(c1, r0), kAt(c1, r1), kAt(c0, r1)].map(q => toScreen(...q)); cx.beginPath(); P.forEach(([a, b], i) => i ? cx.lineTo(a, b) : cx.moveTo(a, b)); cx.closePath(); cx.fillStyle = fill; cx.fill(); if (line) { cx.strokeStyle = line; cx.lineWidth = Math.max(1, z * 0.6); cx.stroke(); } };
-      for (const h of HS) { quad(h.c - 0.46, h.r - 0.5, h.c + 0.46, h.r + 0.46, 'rgba(96,170,70,0.75)', 'rgba(70,130,50,0.6)');
-        const up = (h.r % 2.7) > 1.5, ve = up ? h.r + 0.46 : h.r - 0.5, vr = up ? h.r + 0.62 : h.r - 0.66; quad(h.c - 0.07, Math.min(ve, vr), h.c + 0.07, Math.max(ve, vr), 'rgba(200,190,170,0.95)');
-        for (let k = 0; k < 6; k++) { const sd = (h.no || 1) * 31 + k * 17, fc = h.c + (((sd * 37) % 80) / 100 - 0.4), fv = h.r + (((sd * 53) % 80) / 100 - 0.42); if (Math.abs(fc - h.c) < 0.16) continue;
-          const [a, b] = toScreen(...kAt(fc, fv)), rr = Math.max(1.5, z * 1.3); cx.fillStyle = k % 3 === 0 ? '#3f8f3a' : ['#ff6b8a', '#ffd84a', '#ffffff', '#c86bff'][sd % 4]; cx.beginPath(); cx.arc(a, b, k % 3 === 0 ? rr * 1.8 : rr, 0, 7); cx.fill(); } }
-      { const [pc, pr] = [6.0, Math.floor((R + 1) / 2) * 2.7 + 0.25 + 1.15]; quad(pc - 0.5, pr - 0.55, pc + 0.5, pr + 0.4, 'rgba(176,170,156,0.9)', 'rgba(240,232,210,0.9)'); quad(pc - 2.55, pr - 0.65, pc - 1.45, pr + 0.4, 'rgba(176,170,156,0.9)', 'rgba(240,232,210,0.9)'); } }
+      cx.fillStyle = '#86c25a'; cx.fillRect(0, 0, cv.width, cv.height);
+      if (GR.complete && GR.naturalWidth) { const pt = cx.createPattern(GR, 'repeat'), [a0, b0] = toScreen(0, 0); pt.setTransform(new DOMMatrix().translate(a0, b0).scale(z * 0.22)); cx.globalAlpha = 0.28; cx.fillStyle = pt; cx.fillRect(0, 0, cv.width, cv.height); cx.globalAlpha = 1; }
+      const quad = (c0, r0, c1, r1, fill, line, lw) => { const P = [kAt(c0, r0), kAt(c1, r0), kAt(c1, r1), kAt(c0, r1)].map(q => toScreen(...q)); cx.beginPath(); P.forEach(([a, b], i) => i ? cx.lineTo(a, b) : cx.moveTo(a, b)); cx.closePath(); if (fill) { cx.fillStyle = fill; cx.fill(); } if (line) { cx.strokeStyle = line; cx.lineWidth = Math.max(1, z * (lw || 0.6)); cx.stroke(); } };
+      const R = ROWS(), VE = VEND(), V = []; for (let r = 0; r <= R + 1; r += 2) V.push(Math.floor(r / 2) * 2.7 + 0.25);
+      // distrik kota: tanah rata + grid zona tipis (ala city-builder)
+      quad(-1.2, -0.9, 11.2, VE + 1.6, '#8fca60', 'rgba(255,255,255,0.35)', 1.0);
+      cx.strokeStyle = 'rgba(255,255,255,0.10)'; cx.lineWidth = Math.max(1, z * 0.35); cx.beginPath();
+      for (let c = -1.2; c <= 11.21; c += 0.5) { const [a, b] = toScreen(...kAt(c, -0.9)), [e, f] = toScreen(...kAt(c, VE + 1.6)); cx.moveTo(a, b); cx.lineTo(e, f); }
+      for (let v = -0.9; v <= VE + 1.61; v += 0.45) { const [a, b] = toScreen(...kAt(-1.2, v)), [e, f] = toScreen(...kAt(11.2, v)); cx.moveTo(a, b); cx.lineTo(e, f); } cx.stroke();
+      // kavling: petak seragam + pagar tanaman + bedeng bunga rapi
+      for (const h of HS) { quad(h.c - 0.46, h.r - 0.5, h.c + 0.46, h.r + 0.46, '#78b84c', '#3f7a34', 1.2);
+        const up = (h.r % 2.7) > 1.5, ve = up ? h.r + 0.46 : h.r - 0.5, vr = up ? h.r + 0.6 : h.r - 0.64; quad(h.c - 0.06, Math.min(ve, vr), h.c + 0.06, Math.max(ve, vr), '#d8cdb4');
+        const fv = up ? h.r + 0.38 : h.r - 0.42, cols = ['#ff6b8a', '#ffd84a', '#ffffff', '#c86bff'], fc = cols[Math.abs(h.no | 0) % 4];
+        for (let k = 0; k < 7; k++) { const c = h.c - 0.4 + k * 0.133; if (Math.abs(c - h.c) < 0.1) continue; const [a, b] = toScreen(...kAt(c, fv)), rr = Math.max(1.2, z * 0.9); cx.fillStyle = '#3f8f3a'; cx.beginPath(); cx.arc(a, b, rr * 1.6, 0, 7); cx.fill(); cx.fillStyle = fc; cx.beginPath(); cx.arc(a, b - rr * 0.4, rr * 0.8, 0, 7); cx.fill(); } }
+      { const pr = V[V.length - 1] + 1.15; quad(5.5, pr - 0.55, 6.5, pr + 0.4, '#b9b3a4', '#8a8478', 1.0); quad(3.45, pr - 0.65, 4.55, pr + 0.4, '#b9b3a4', '#8a8478', 1.0); }
+      // jalan: tepi lurus (tanpa ujung bulat), bahu jalan lalu badan jalan, persimpangan menyatu
+      const RQ = V.map(v => [-0.7, v - 0.14, 10.7, v + 0.14, -0.7, v - 0.105, 10.7, v + 0.105]); RQ.push([4.81, -0.5, 5.19, VE + 4.2, 4.85, -0.5, 5.15, VE + 4.2]);
+      RQ.forEach(q => quad(q[0], q[1], q[2], q[3], '#a98352')); RQ.forEach(q => quad(q[4], q[5], q[6], q[7], '#d3ad76'));
+      cx.strokeStyle = 'rgba(255,240,210,0.35)'; cx.lineWidth = Math.max(1, z * 0.4); cx.setLineDash([z * 3, z * 3]); cx.beginPath();
+      for (const v of V) { const [a, b] = toScreen(...kAt(-0.6, v)), [e, f] = toScreen(...kAt(10.6, v)); cx.moveTo(a, b); cx.lineTo(e, f); }
+      { const [a, b] = toScreen(...kAt(5, -0.4)), [e, f] = toScreen(...kAt(5, VE + 4.1)); cx.moveTo(a, b); cx.lineTo(e, f); } cx.stroke(); cx.setLineDash([]); }
     else cx.drawImage(bg, Math.round(ox), Math.round(oy), Math.round(WW * z), Math.round(WH * z));
     // sea shimmer
     cx.fillStyle = 'rgba(255,255,255,0.35)';
