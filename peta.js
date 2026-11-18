@@ -216,7 +216,7 @@
     const z = cam.z * dpr, [sx, sy] = toScreen(o.x, o.y), s = Math.max(1, Math.round(z));
     if (sx < -20 * s || sy < -30 * s || sx > cv.width + 20 * s || sy > cv.height + 20 * s) return;
     const r = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(sx + x * s), Math.round(sy + y * s), w * s, h * s); };
-    if (SMODE) { const AV3 = { COWOK1: 0, COWOK2: 0, COWOK3: 2, CEWEK1: 1, CEWEK2: 1, CEWEK3: 1 }, ai = AV3[o.w.av] ?? [3, 0, 2, 3][Math.abs(o.w.no | 0) % 4], fr = o.moving ? Math.floor(t * 7 + o.ph) % 4 : 0, im = simg('c3/w' + ai + '_' + fr); if (!im.complete || !im.naturalWidth) return; const hh = 11 * z, ww = im.naturalWidth / im.naturalHeight * hh, b = 0;
+    if (SMODE) { const AVM = { COWOK1: 9, COWOK2: 1, COWOK3: 6, CEWEK1: 5, CEWEK2: 2, CEWEK3: 3 }, MIS = [4, 0, 7, 8], ai = AVM[o.w.av] ?? MIS[Math.abs(o.w.no | 0) % 4], im = simg('w/w' + ai); if (!im.complete || !im.naturalWidth) return; const hh = 9 * z, ww = im.naturalWidth / im.naturalHeight * hh, b = o.moving ? Math.abs(Math.sin(t * 9 + o.ph)) * z * 0.6 : 0;
       c.fillStyle = 'rgba(0,0,0,0.22)'; c.fillRect(Math.round(sx - ww * 0.3), Math.round(sy - z * 0.5), Math.round(ww * 0.6), Math.max(1, Math.round(z)));
       c.save(); c.translate(Math.round(sx), 0); if (o.tx < o.x - 0.3) c.scale(-1, 1); c.drawImage(im, Math.round(-ww / 2), Math.round(sy - hh - b), Math.round(ww), Math.round(hh)); c.restore();
       if (P.sel === o) { c.fillStyle = '#ffd84a'; c.fillRect(Math.round(sx - 2 * z), Math.round(sy - hh - 4 * z), Math.round(4 * z), Math.round(2 * z)); } return; }
@@ -249,8 +249,8 @@
     const z = cam.z * dpr, [sx, sy] = toScreen(U.x, U.y), s = Math.max(1, Math.round(z));
     const f = U.face, r = (x, y, w, h, col) => { c.fillStyle = col; c.fillRect(Math.round(sx + (f < 0 ? -x - w + 1 : x) * s), Math.round(sy + y * s), w * s, h * s); };
     if (SMODE && U.sleep) { const [px, py] = POSXY(); ZQ.push([px, py, 99]); return; }
-    if (SMODE) { const nm = U.sleep ? 'w/u_tidur' : U.moving ? 'c3/u_jalan' + (Math.floor(t * 7) % 4) : (U.wait > 0 && U.talk > 0) ? (Math.floor(t * 2) % 2 ? 'c3/u_wave' : 'c3/u_point') : 'c3/u_idle', im = simg(nm), bi = { complete: false };
-      if (!im.complete || !im.naturalWidth) return; const hh = (U.sleep ? 9 : 12.5) * z, ww = im.naturalWidth / im.naturalHeight * hh, br = U.moving ? 0 : Math.round(Math.sin(t * 2) * z * 0.3);
+    if (SMODE) { const nm = U.sleep ? 'w/u_tidur' : U.moving ? 'w/u_j' + (Math.floor(t * 5) % 4) : (U.wait > 0 && U.talk > 0 && Math.floor(t * 3) % 2) ? 'w/u_bicara' : 'w/u_idle', im = simg(nm), bi = { complete: false };
+      if (!im.complete || !im.naturalWidth) return; const hh = (U.sleep ? 8 : 10.5) * z, ww = im.naturalWidth / im.naturalHeight * hh, br = U.moving ? 0 : Math.round(Math.sin(t * 2) * z * 0.3);
       c.fillStyle = 'rgba(0,0,0,0.22)'; c.fillRect(Math.round(sx - ww * 0.3), Math.round(sy - z * 0.5), Math.round(ww * 0.6), Math.max(1, Math.round(z)));
       c.drawImage(im, Math.round(sx - ww / 2), Math.round(sy - hh - br), Math.round(ww), Math.round(hh));
       if (bi.complete && bi.naturalWidth) { const bh = 4.5 * z, bw = bi.naturalWidth / bi.naturalHeight * bh; c.drawImage(bi, Math.round(sx - bw / 2 + (U.sleep ? -2 * z : z * 0.5)), Math.round(sy - hh - br - bh + z * 1.2), Math.round(bw), Math.round(bh)); }
@@ -321,32 +321,35 @@
     const t = ts / 1000, dt = Math.min(0.1, (ts - last) / 1000 || 0.016); last = ts;
     const h = window.SIKEPO_FORCE_HOUR ?? wibHour(), night = nightK(h);
     step(dt, night); stepUdin(dt, t, night); stepWx(dt, t);
-    if (P.follow) { const f = P.follow === 'U' ? U : P.follow, k = 1 - Math.exp(-dt * 4); cam.x += (f.x - cam.x) * k; cam.y += (f.y - 8 - cam.y) * k; cam.z += (Math.max(cam.z, 5) - cam.z) * k * 0.5; clampCam(); }
+    if (P.follow) { const f = P.follow === 'U' ? U : P.follow, k = 1 - Math.exp(-dt * 4); cam.x += (f.x - cam.x) * k; cam.y += (f.y - 8 - cam.y) * k; cam.z += (Math.max(cam.z, 7.5) - cam.z) * k * 0.5; clampCam(); }
     { let b = document.getElementById('droneBadge'); if (!b) { b = document.createElement('button'); b.id = 'droneBadge'; b.type = 'button'; b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(76px + env(safe-area-inset-top,0px));z-index:45;font:10px var(--display,monospace);padding:8px 12px;border:3px solid #1c1c24;background:#c8302a;color:#fff;box-shadow:3px 3px 0 #1c1c24;cursor:pointer'; b.onclick = () => { P.follow = null; }; document.body.append(b); }
       const on = !!P.follow; b.hidden = !on; if (on) { const nm = P.follow === 'U' ? 'WALI KOTA UDIN' : String(P.follow.w.nama || 'WARGA').toUpperCase().slice(0, 16); const txt = '● DRONE: ' + nm + '  ✕'; if (b.textContent !== txt) b.textContent = txt; } }
     cx.setTransform(1, 0, 0, 1, 0, 0); cx.imageSmoothingEnabled = false;
     cx.fillStyle = SMODE ? '#2b4a26' : FMODE ? '#1a2e24' : '#2c86d8'; cx.fillRect(0, 0, cv.width, cv.height);
     const z = cam.z * dpr; const [ox, oy] = toScreen(0, 0);
     if (SMODE) { const GR = window.__GR || (window.__GR = Object.assign(new Image(), { src: 'img/rumput.jpg' }));
-      cx.fillStyle = '#86c25a'; cx.fillRect(0, 0, cv.width, cv.height);
-      if (GR.complete && GR.naturalWidth) { const pt = cx.createPattern(GR, 'repeat'), [a0, b0] = toScreen(0, 0); pt.setTransform(new DOMMatrix().translate(a0, b0).scale(z * 0.22)); cx.globalAlpha = 0.28; cx.fillStyle = pt; cx.fillRect(0, 0, cv.width, cv.height); cx.globalAlpha = 1; }
+      const TG = window.__TG || (window.__TG = Object.assign(new Image(), { src: 'img/tex_grass.png' })), TD = window.__TD || (window.__TD = Object.assign(new Image(), { src: 'img/tex_dirt.png' }));
+      const pat = (img, sc) => { if (!img.complete || !img.naturalWidth) return null; const pt = cx.createPattern(img, 'repeat'), [a0, b0] = toScreen(0, 0); pt.setTransform(new DOMMatrix().translate(a0, b0).scale(z * sc)); return pt; };
+      const PG = pat(TG, 0.45), PD = pat(TD, 0.4);
+      cx.fillStyle = PG || '#86c25a'; cx.fillRect(0, 0, cv.width, cv.height);
+      if (GR.complete && GR.naturalWidth) { const pt = cx.createPattern(GR, 'repeat'), [a0, b0] = toScreen(0, 0); pt.setTransform(new DOMMatrix().translate(a0, b0).scale(z * 0.22)); cx.globalAlpha = PG ? 0 : 0.28; cx.fillStyle = pt; cx.fillRect(0, 0, cv.width, cv.height); cx.globalAlpha = 1; }
       const quad = (c0, r0, c1, r1, fill, line, lw) => { const P = [kAt(c0, r0), kAt(c1, r0), kAt(c1, r1), kAt(c0, r1)].map(q => toScreen(...q)); cx.beginPath(); P.forEach(([a, b], i) => i ? cx.lineTo(a, b) : cx.moveTo(a, b)); cx.closePath(); if (fill) { cx.fillStyle = fill; cx.fill(); } if (line) { cx.strokeStyle = line; cx.lineWidth = Math.max(1, z * (lw || 0.6)); cx.stroke(); } };
       const R = ROWS(), VE = VEND(), V = []; for (let r = 0; r <= R + 1; r += 2) V.push(Math.floor(r / 2) * 2.7 + 0.25);
       // distrik kota: tanah rata + grid zona tipis (ala city-builder)
-      quad(-1.2, -0.9, 11.2, VE + 1.6, '#8fca60', 'rgba(255,255,255,0.35)', 1.0);
-      cx.strokeStyle = 'rgba(255,255,255,0.10)'; cx.lineWidth = Math.max(1, z * 0.35); cx.beginPath();
+      quad(-1.2, -0.9, 11.2, VE + 1.6, PG ? 'rgba(255,255,200,0.06)' : '#8fca60', 'rgba(255,255,255,0.35)', 1.0);
+      cx.strokeStyle = 'rgba(255,255,255,' + (cam.z > 4 ? 0 : 0.07) + ')'; cx.lineWidth = Math.max(1, z * 0.35); cx.beginPath();
       for (let c = -1.2; c <= 11.21; c += 0.5) { const [a, b] = toScreen(...kAt(c, -0.9)), [e, f] = toScreen(...kAt(c, VE + 1.6)); cx.moveTo(a, b); cx.lineTo(e, f); }
       for (let v = -0.9; v <= VE + 1.61; v += 0.45) { const [a, b] = toScreen(...kAt(-1.2, v)), [e, f] = toScreen(...kAt(11.2, v)); cx.moveTo(a, b); cx.lineTo(e, f); } cx.stroke();
       // kavling: petak seragam + pagar tanaman + bedeng bunga rapi
-      for (const h of HS) { quad(h.c - 0.46, h.r - 0.5, h.c + 0.46, h.r + 0.46, '#78b84c', '#3f7a34', 1.2);
+      for (const h of HS) { quad(h.c - 0.46, h.r - 0.5, h.c + 0.46, h.r + 0.46, 'rgba(60,110,30,0.18)', 'rgba(60,100,30,0.35)', 1.0);
         const up = (h.r % 2.7) > 1.5, ve = up ? h.r + 0.46 : h.r - 0.5, vr = up ? h.r + 0.6 : h.r - 0.64; quad(h.c - 0.06, Math.min(ve, vr), h.c + 0.06, Math.max(ve, vr), '#d8cdb4');
         const fv = up ? h.r + 0.38 : h.r - 0.42, cols = ['#ff6b8a', '#ffd84a', '#ffffff', '#c86bff'], fc = cols[Math.abs(h.no | 0) % 4];
         if (false) for (let k = 0; k < 7; k++) { const c = h.c - 0.4 + k * 0.133; if (Math.abs(c - h.c) < 0.1) continue; const [a, b] = toScreen(...kAt(c, fv)), rr = Math.max(1.2, z * 0.9); cx.fillStyle = '#3f8f3a'; cx.beginPath(); cx.arc(a, b, rr * 1.6, 0, 7); cx.fill(); cx.fillStyle = fc; cx.beginPath(); cx.arc(a, b - rr * 0.4, rr * 0.8, 0, 7); cx.fill(); } }
       { const pr = V[V.length - 1] + 1.15; quad(5.5, pr - 0.55, 6.5, pr + 0.4, '#b9b3a4', '#8a8478', 1.0); quad(3.45, pr - 0.65, 4.55, pr + 0.4, '#b9b3a4', '#8a8478', 1.0); }
       // jalan: tepi lurus (tanpa ujung bulat), bahu jalan lalu badan jalan, persimpangan menyatu
       const RQ = V.map(v => [-0.7, v - 0.14, 10.7, v + 0.14, -0.7, v - 0.105, 10.7, v + 0.105]); RQ.push([4.81, -0.5, 5.19, VE + 4.2, 4.85, -0.5, 5.15, VE + 4.2]);
-      RQ.forEach(q => quad(q[0], q[1], q[2], q[3], '#a98352')); RQ.forEach(q => quad(q[4], q[5], q[6], q[7], '#d3ad76'));
-      cx.strokeStyle = 'rgba(255,240,210,0.35)'; cx.lineWidth = Math.max(1, z * 0.4); cx.setLineDash([z * 3, z * 3]); cx.beginPath();
+      RQ.forEach(q => quad(q[0], q[1], q[2], q[3], '#8c6a3c')); RQ.forEach(q => quad(q[4], q[5], q[6], q[7], PD || '#d3ad76'));
+      cx.strokeStyle = 'rgba(255,240,210,0)'; cx.lineWidth = Math.max(1, z * 0.4); cx.setLineDash([z * 3, z * 3]); cx.beginPath();
       for (const v of V) { const [a, b] = toScreen(...kAt(-0.6, v)), [e, f] = toScreen(...kAt(10.6, v)); cx.moveTo(a, b); cx.lineTo(e, f); }
       { const [a, b] = toScreen(...kAt(5, -0.4)), [e, f] = toScreen(...kAt(5, VE + 4.1)); cx.moveTo(a, b); cx.lineTo(e, f); } cx.stroke(); cx.setLineDash([]); }
     else cx.drawImage(bg, Math.round(ox), Math.round(oy), Math.round(WW * z), Math.round(WH * z));
