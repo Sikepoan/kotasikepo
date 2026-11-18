@@ -274,3 +274,10 @@ body.app:has(#pick:not([hidden])) .ui-count { display: none; }
 .k-avs { display: flex; margin: 6px 0 10px; } .k-avs img { height: 46px; image-rendering: pixelated; margin-right: -6px; background: #ffd84a; border: 2px solid var(--ink); border-radius: 50%; width: 46px; object-fit: cover; object-position: top; }
 .k-intro .k-big { font-family: var(--display); font-size: 13px; line-height: 1.6; margin: 0 0 8px; } .k-intro ul { margin: 0 0 12px; padding-left: 18px; font-size: 14px; } .k-intro .btn { display: block; text-align: center; }
 .k-intro h3, .k-intro h3 span { color: var(--ink) !important; font-family: var(--display); font-size: 18px; } .k-intro ul, .k-intro li { font-family: var(--body) !important; font-size: 14px; letter-spacing: 0; text-transform: none; color: var(--ink); }
+/* 18 Nov: kartu warga ringkas di bawah (tidak menutupi peta / mode drone) */
+body.app .pick { top: auto !important; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); left: 10px; right: 76px; max-width: 330px; margin: 0; padding: 6px; display: flex; gap: 8px; align-items: center; }
+body.app .pick canvas { width: 58%; flex: none; }
+body.app .pick p { margin: 0; font-size: 11px; line-height: 1.35; }
+body.app .pick .x { width: 24px; height: 24px; font-size: 14px; right: -8px; top: -10px; }
+body.app:has(#pick:not([hidden])) .ui-count { display: block; }
+@media (min-width: 900px) { body.app .pick { left: 112px; right: auto; bottom: 16px; max-width: 380px; } }
