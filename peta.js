@@ -39,7 +39,7 @@
   const VR = r => Math.floor(r / 2) * 2.7 + (r % 2) * 1.1 + 1.0, VEND = () => Math.max(VR(ROWS() - 1) + 1, Math.floor((ROWS() + 1) / 2) * 2.7 + 0.25 + 0.9);   // 2 baris berhadapan per jalan
   const kCol = i => { const c = i % PERROW; return c >= 5 ? c + 1 : c; };          // kolom 5 = jalan utama
   let HS = [];
-  function houseSpots(n) { HS = []; for (let i = 0; i < n; i++) { const [x, y] = kAt(kCol(i), VR(Math.floor(i / PERROW))); const w = (P.walkers.slice().sort((p, q) => p.w.no - q.w.no)[i] || {}).w; HS.push({ x, y, nama: w ? String(w.nama || '').toUpperCase().slice(0, 16) : '', no: w ? w.no : 0 }); } const [hx, hy] = POSXY(); Object.assign(HOME, { x: hx - 2, y: hy - 1 }); if (typeof U !== 'undefined') { const g = GATE(); const [ux, uy] = kAt(5, VEND() + 3.0); U.x = U.tx = ux; U.y = U.ty = uy; } }
+  function houseSpots(n) { HS = []; for (let i = 0; i < n; i++) { const [x, y] = kAt(kCol(i), VR(Math.floor(i / PERROW))); const w = (P.walkers.slice().sort((p, q) => p.w.no - q.w.no)[i] || {}).w; HS.push({ c: kCol(i), r: VR(Math.floor(i / PERROW)), x, y, nama: w ? String(w.nama || '').toUpperCase().slice(0, 16) : '', no: w ? w.no : 0 }); } const [hx, hy] = POSXY(); Object.assign(HOME, { x: hx - 2, y: hy - 1 }); if (typeof U !== 'undefined') { const g = GATE(); const [ux, uy] = kAt(5, VEND() + 3.0); U.x = U.tx = ux; U.y = U.ty = uy; } }
   const ROWS = () => Math.max(1, Math.ceil(HS.length / PERROW));
   const GATE = () => { const [x, y] = kAt(5, VEND() + 2.4); return { x, y }; };
   const POSXY = () => { const RR = ROWS(); let vL = 0; for (let r = 0; r <= RR + 1; r += 2) vL = Math.floor(r / 2) * 2.7 + 0.25; return kAt(6.0, vL + 1.15); };
@@ -317,7 +317,10 @@
       const R = ROWS();
       const RD = []; for (let r = 0; r <= R + 1; r += 2) { const v = Math.floor(r / 2) * 2.7 + 0.25; RD.push([kAt(-0.6, v), kAt(10.6, v), 0]); }
       RD.push([kAt(5, -0.4), kAt(5, VEND() + 4.2), 2]);
-      RD.forEach(([p1, p2, e]) => strip(p1, p2, 12 + e, '#b98f5a')); RD.forEach(([p1, p2, e]) => strip(p1, p2, 9 + e, '#d2aa72')); }
+      RD.forEach(([p1, p2, e]) => strip(p1, p2, 12 + e, '#b98f5a')); RD.forEach(([p1, p2, e]) => strip(p1, p2, 9 + e, '#d2aa72'));
+      const quad = (c0, r0, c1, r1, fill, line) => { const P = [kAt(c0, r0), kAt(c1, r0), kAt(c1, r1), kAt(c0, r1)].map(q => toScreen(...q)); cx.beginPath(); P.forEach(([a, b], i) => i ? cx.lineTo(a, b) : cx.moveTo(a, b)); cx.closePath(); cx.fillStyle = fill; cx.fill(); if (line) { cx.strokeStyle = line; cx.lineWidth = Math.max(1, z * 0.6); cx.stroke(); } };
+      for (const h of HS) quad(h.c - 0.42, h.r - 0.48, h.c + 0.42, h.r + 0.42, 'rgba(124,194,90,0.85)', 'rgba(240,232,210,0.9)');
+      { const [pc, pr] = [6.0, Math.floor((R + 1) / 2) * 2.7 + 0.25 + 1.15]; quad(pc - 0.5, pr - 0.55, pc + 0.5, pr + 0.4, 'rgba(176,170,156,0.9)', 'rgba(240,232,210,0.9)'); quad(pc - 2.55, pr - 0.65, pc - 1.45, pr + 0.4, 'rgba(176,170,156,0.9)', 'rgba(240,232,210,0.9)'); } }
     else cx.drawImage(bg, Math.round(ox), Math.round(oy), Math.round(WW * z), Math.round(WH * z));
     // sea shimmer
     cx.fillStyle = 'rgba(255,255,255,0.35)';
@@ -328,15 +331,18 @@
     const list = P.walkers.slice().sort((a, b) => a.y - b.y);
     let udDrawn = false;
     if (!window.PETA_HIDE) {
-    if (SMODE) { const RI = window.__RI || (window.__RI = Object.assign(new Image(), { src: 'img/rumah3d.png' })), GI = window.__GI || (window.__GI = Object.assign(new Image(), { src: 'img/gerbang3d.png' }));
+    if (SMODE) { const RV = window.__RV || (window.__RV = [0, 1, 2, 3, 4, 5].map(k => Object.assign(new Image(), { src: 'img/rumah3d_v' + k + '.png' }))), RI = RV[0], GI = window.__GI || (window.__GI = Object.assign(new Image(), { src: 'img/gerbang3d.png' }));
       const items = list.map(o => [o.y, () => drawWalker(cx, o, t)]); items.push([U.y, () => drawUdin(cx, night, t)]);
-      if (RI.complete && RI.naturalWidth) for (const h of HS) items.push([h.y, () => { const hh = 36 * z, ww = RI.naturalWidth / RI.naturalHeight * hh, [a, b] = toScreen(h.x, h.y); cx.imageSmoothingEnabled = true; cx.drawImage(RI, Math.round(a - ww / 2), Math.round(b - hh * 0.82), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false;
+      if (RI.complete && RI.naturalWidth) for (const h of HS) items.push([h.y, () => { const hh = 36 * z, ww = RI.naturalWidth / RI.naturalHeight * hh, [a, b] = toScreen(h.x, h.y); cx.imageSmoothingEnabled = true; { const vi = (Math.abs(h.no | 0) * 7 + 3) % 12, im = RV[vi % 6].complete && RV[vi % 6].naturalWidth ? RV[vi % 6] : RI; cx.save(); cx.translate(Math.round(a), 0); if (vi >= 6) cx.scale(-1, 1); cx.drawImage(im, Math.round(-ww / 2), Math.round(b - hh * 0.82), Math.round(ww), Math.round(hh)); cx.restore(); } cx.imageSmoothingEnabled = false;
         { const ow = P.byNo.get(h.no); if (ow && ow.sleep) ZQ.push([h.x, h.y, h.no]); }
         if (h.nama && window.SK && cam.z >= 1.6) { const sc = Math.max(1, Math.round(dpr * (cam.z >= 3 ? 2 : 1))), tw = SK.tw(h.nama, sc), y = Math.round(b - hh * 0.86 - 11 * sc); cx.fillStyle = 'rgba(28,28,36,0.85)'; cx.fillRect(Math.round(a - tw / 2 - 3 * sc), y - 2 * sc, tw + 6 * sc, 11 * sc); SK.txt(cx, h.nama, Math.round(a - tw / 2), y, sc, '#ffffff', null); } }]);
       const PI = window.__PI || (window.__PI = Object.assign(new Image(), { src: 'img/pos3d.png' }));
       if (PI.complete && PI.naturalWidth) { const RR = ROWS(); let vL = 0; for (let r = 0; r <= RR + 1; r += 2) vL = Math.floor(r / 2) * 2.7 + 0.25; for (const v of [vL]) { const [px, py] = kAt(6.0, v + 1.15); items.push([py, () => { const hh = 34 * z, ww = PI.naturalWidth / PI.naturalHeight * hh, [a, b] = toScreen(px, py); cx.imageSmoothingEnabled = true; cx.drawImage(PI, Math.round(a - ww / 2), Math.round(b - hh * 0.85), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]); } }
       const WI = window.__WI || (window.__WI = Object.assign(new Image(), { src: 'img/warung3d.png' }));
       if (window.SIKEPO_WARUNG !== false && WI.complete && WI.naturalWidth) { const [px, py] = POSXY(), wx = px - 2 * KU[0] - 0.1 * KV[0], wy = py - 2 * KU[1] - 0.1 * KV[1]; items.push([wy, () => { const hh = 40 * z, ww = WI.naturalWidth / WI.naturalHeight * hh, [a, b] = toScreen(wx, wy); cx.imageSmoothingEnabled = true; cx.drawImage(WI, Math.round(a - ww / 2), Math.round(b - hh * 0.85), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]); }
+      { const RR = ROWS(); for (let r = 0; r <= RR + 1; r += 2) { const v = Math.floor(r / 2) * 2.7 + 0.25; for (let c = 0.5; c < 11; c += 1) { if (c > 4 && c < 6) continue; for (const dv of [-0.45, 0.45]) { const [tx, ty] = kAt(c, v + dv), sd = c * 13 + v * 7 + dv * 5; items.push([ty, () => { const [a, b] = toScreen(tx, ty), rr = (5 + (Math.abs(Math.round(sd)) % 3)) * z, gc = ['#2f7a3a', '#3a8a3f', '#2a6e34'][Math.abs(Math.round(sd)) % 3];
+        cx.fillStyle = 'rgba(0,0,0,0.22)'; cx.beginPath(); cx.ellipse(a, b, rr * 0.7, rr * 0.25, 0, 0, 7); cx.fill(); cx.fillStyle = '#6b4a2c'; cx.fillRect(Math.round(a - z * 0.7), Math.round(b - rr * 1.6), Math.max(1, Math.round(z * 1.4)), Math.round(rr * 1.6));
+        cx.fillStyle = gc; cx.beginPath(); cx.ellipse(a, b - rr * 2.0, rr, rr * 1.05, 0, 0, 7); cx.fill(); cx.fillStyle = 'rgba(120,200,110,0.55)'; cx.beginPath(); cx.ellipse(a - rr * 0.3, b - rr * 2.4, rr * 0.45, rr * 0.4, 0, 0, 7); cx.fill(); }]); } } } }
       const gt = GATE(); if (GI.complete && GI.naturalWidth) items.push([gt.y, () => { const hh = 62 * z, ww = GI.naturalWidth / GI.naturalHeight * hh, [a, b] = toScreen(gt.x, gt.y); cx.imageSmoothingEnabled = true; cx.drawImage(GI, Math.round(a - ww * 0.46), Math.round(b - hh * 0.8), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]);
       items.sort((p, q) => p[0] - q[0]).forEach(([, f]) => f()); }
     else { for (const o of list) { if (!udDrawn && o.y > U.y) { drawUdin(cx, night, t); udDrawn = true; } drawWalker(cx, o, t); }
