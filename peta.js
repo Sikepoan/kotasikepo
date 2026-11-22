@@ -39,8 +39,8 @@
   const VR = r => Math.floor(r / 2) * 2.7 + (r % 2) * 1.1 + 1.0, VEND = () => Math.max(VR(ROWS() - 1) + 1, Math.floor((ROWS() + 1) / 2) * 2.7 + 0.25 + 0.9);   // 2 baris berhadapan per jalan
   const kCol = i => { const c = i % PERROW; return c >= 5 ? c + 1 : c; };          // kolom 5 = jalan utama
   let HS = [];
-  function houseSpots(n) { HS = []; for (let i = 0; i < n; i++) { const D2 = i >= CAP1, j = D2 ? i - CAP1 : i, cc = kCol(j) + (D2 ? -12.4 : 0), rr = VR(Math.floor(j / PERROW)); const [x, y] = kAt(cc, rr); const w = (P.walkers.slice().sort((p, q) => p.w.no - q.w.no)[i] || {}).w; HS.push({ c: cc, r: rr, d2: D2, x, y, nama: w ? String(w.nama || '').toUpperCase().slice(0, 16) : '', no: w ? w.no : 0 }); } const [hx, hy] = POSXY(); Object.assign(HOME, { x: hx - 2, y: hy - 1 }); if (typeof U !== 'undefined') { const g = GATE(); const [ux, uy] = kAt(5, VEND() + 3.0); U.x = U.tx = ux; U.y = U.ty = uy; } }
-  const CAP1 = 80, ROWS = () => Math.max(1, Math.ceil(Math.min(HS.length, CAP1) / PERROW)), ROWS2 = () => Math.ceil(Math.max(0, HS.length - CAP1) / PERROW);
+  function houseSpots(n) { HS = []; n = Math.min(n, MAXRUMAH); for (let i = 0; i < n; i++) { const D2 = i >= CAP1, j = D2 ? i - CAP1 : i, cc = D2 ? (j < 20 ? kCol(j) : (j - 20) % 5) - 12.4 : kCol(j), rr = VR(D2 ? (j < 20 ? Math.floor(j / PERROW) : 2 + Math.floor((j - 20) / 5)) : Math.floor(j / PERROW)); const [x, y] = kAt(cc, rr); const w = (P.walkers.slice().sort((p, q) => p.w.no - q.w.no)[i] || {}).w; HS.push({ c: cc, r: rr, d2: D2, x, y, nama: w ? String(w.nama || '').toUpperCase().slice(0, 16) : '', no: w ? w.no : 0 }); } const [hx, hy] = POSXY(); Object.assign(HOME, { x: hx - 2, y: hy - 1 }); if (typeof U !== 'undefined') { const g = GATE(); const [ux, uy] = kAt(5, VEND() + 3.0); U.x = U.tx = ux; U.y = U.ty = uy; } }
+  const CAP1 = 80, ROWS = () => Math.max(1, Math.ceil(Math.min(HS.length, CAP1) / PERROW)), ROWS2 = () => { const j = Math.max(0, HS.length - CAP1); return j <= 20 ? Math.ceil(j / PERROW) : 2 + Math.ceil((j - 20) / 5); }, MAXRUMAH = 120, PERRUMAH = 10;
   const GATE = () => { const [x, y] = kAt(5, VEND() + 2.4); return { x, y }; };
   const POSXY = () => { const RR = ROWS(); let vL = 0; for (let r = 0; r <= RR + 1; r += 2) vL = Math.floor(r / 2) * 2.7 + 0.25; return kAt(6.0, vL + 1.15); };
   let ZQ = [];
@@ -129,10 +129,12 @@
 
   // ---------- canvas / camera ----------
   let cv, cx, cam = { x: ISL.cx, y: ISL.cy, z: 3 }, dpr = 1, last = 0;
-  const SB = { x0: -330, x1: 650, y0: -200, y1: 420 };   // batas gambar lahan (SMODE): layar selalu penuh lahan
-  const zMin = () => SMODE ? Math.max(cv.width / dpr / (SB.x1 - SB.x0), cv.height / dpr / (SB.y1 - SB.y0), 0.8) * 1.001 : Math.max(1.5, Math.min(cv.width / dpr / WW, cv.height / dpr / WH) * 0.95), zMax = 9;
+  const SB = { x0: -330, x1: 650, y0: -200, y1: 420 };
+  function fitSB() { if (!SMODE || !HS) return; const VE = VEND() + 6, P4 = [kAt(-14.5, -7), kAt(15.5, -7), kAt(15.5, VE), kAt(-14.5, VE)]; for (const h of HS) P4.push(kAt(h.c - 2, h.r - 2), kAt(h.c + 2, h.r + 2)); SB.x0 = Math.min(...P4.map(q => q[0])); SB.x1 = Math.max(...P4.map(q => q[0])); SB.y0 = Math.min(...P4.map(q => q[1])); SB.y1 = Math.max(...P4.map(q => q[1])); }
+  const CAMV = { vx: 0, vy: 0, tz: null, ax: 0, ay: 0 };   // batas gambar lahan (SMODE): layar selalu penuh lahan
+  const zMin = () => SMODE ? Math.max(0.12, Math.min(cv.width / dpr / (SB.x1 - SB.x0), cv.height / dpr / (SB.y1 - SB.y0)) * 0.9) : Math.max(1.5, Math.min(cv.width / dpr / WW, cv.height / dpr / WH) * 0.95), zMax = 9;
   function clampCam() { cam.z = Math.max(zMin(), Math.min(zMax, cam.z));
-    if (SMODE) { const hw = cv.width / dpr / cam.z / 2, hh = cv.height / dpr / cam.z / 2; cam.x = Math.max(SB.x0 + hw, Math.min(SB.x1 - hw, cam.x)); cam.y = Math.max(SB.y0 + hh, Math.min(SB.y1 - hh, cam.y)); return; }
+    if (SMODE) { cam.x = Math.max(SB.x0, Math.min(SB.x1, cam.x)); cam.y = Math.max(SB.y0, Math.min(SB.y1, cam.y)); return; }
     cam.x = Math.max(20, Math.min(WW - 20, cam.x)); cam.y = Math.max(20, Math.min(WH - 20, cam.y)); }
   function resize() { const r = cv.getBoundingClientRect(); dpr = Math.min(2, window.devicePixelRatio || 1); cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); clampCam(); }
   const toScreen = (x, y) => [(x - cam.x) * cam.z * dpr + cv.width / 2, (y - cam.y) * cam.z * dpr + cv.height / 2];
@@ -226,7 +228,7 @@
     if (SMODE && night <= 0.6) chatCheck(dt);
     for (const o of P.walkers) {
       if (night > 0.6) {   // malam: pulang ke tikar sendiri & tidur
-        if (SMODE) { if (o.state) { if (o.state === 'warung') seatTaken[o.seat] = null; if (o.state === 'kumpul' && gMembers[o.gi]) gMembers[o.gi] = gMembers[o.gi].filter(x => x !== o); o.state = null; o.seated = false; } const h = HS.find(q => q.no === o.w.no); if (h) o.home = { x: h.x + 6, y: h.y + 4 }; }
+        if (SMODE) { if (o.state) { if (o.state === 'warung') seatTaken[o.seat] = null; if (o.state === 'kumpul' && gMembers[o.gi]) gMembers[o.gi] = gMembers[o.gi].filter(x => x !== o); o.state = null; o.seated = false; } const h = HS.find(q => q.no === o.w.no) || (HS.length ? HS[Math.abs(o.w.no | 0) % HS.length] : null); if (h) o.home = { x: h.x + 6, y: h.y + 4 }; }
         const dx = o.home.x - o.x, dy = o.home.y - o.y, d = Math.hypot(dx, dy);
         if (d > 0.6) { const v = Math.min(d, 14 * dt); o.x += dx / d * v; o.y += dy / d * v; o.moving = true; } else o.moving = false;
         o.sleep = d <= 0.6; continue;
@@ -354,11 +356,14 @@
     if (WX.flash > 0) { cx.fillStyle = `rgba(235,240,255,${(0.55 * WX.flash).toFixed(3)})`; cx.fillRect(0, 0, cv.width, cv.height);
       if (WX.flash > 0.6) { let x = WX.boltX * cv.width, y = 0; cx.fillStyle = '#fffbe0'; const s = Math.max(2, Math.round(2 * dpr)); while (y < cv.height * 0.45) { const nx = x + (Math.random() - 0.5) * 30 * dpr; for (let k = 0; k < 10; k++) cx.fillRect(Math.round(x + (nx - x) * k / 10), Math.round(y + k * 2 * dpr), s, s * 2); x = nx; y += 20 * dpr; } } }
   }
+  function camStep(dt) { fitSB();
+    if (CAMV.tz) { const [wx, wy] = toWorld(CAMV.ax, CAMV.ay), z0 = cam.z, nz = cam.z + (CAMV.tz - cam.z) * Math.min(1, dt * 12); cam.z = nz; const k = 1 - z0 / cam.z; cam.x += (wx - cam.x) * k; cam.y += (wy - cam.y) * k; if (Math.abs(CAMV.tz - cam.z) < 0.002) CAMV.tz = null; clampCam(); }
+    if (Math.abs(CAMV.vx) + Math.abs(CAMV.vy) > 2) { cam.x += CAMV.vx * dt; cam.y += CAMV.vy * dt; const f = Math.exp(-dt * 4.5); CAMV.vx *= f; CAMV.vy *= f; clampCam(); } }
   function frame(ts) {
     const t = ts / 1000, dt = Math.min(0.1, (ts - last) / 1000 || 0.016); last = ts;
     const h = window.SIKEPO_FORCE_HOUR ?? wibHour(), night = nightK(h);
-    step(dt, night); stepUdin(dt, t, night); stepWx(dt, t);
-    if (P.follow) { const f = P.follow === 'U' ? U : P.follow, k = 1 - Math.exp(-dt * 4); cam.x += (f.x - cam.x) * k; cam.y += (f.y - 8 - cam.y) * k; cam.z += (Math.max(cam.z, 7.5) - cam.z) * k * 0.5; clampCam(); }
+    step(dt, night); stepUdin(dt, t, night); stepWx(dt, t); camStep(dt);
+    if (P.follow) { CAMV.vx = CAMV.vy = 0; const f = P.follow === 'U' ? U : P.follow, k = 1 - Math.exp(-dt * 4); cam.x += (f.x - cam.x) * k; cam.y += (f.y - 8 - cam.y) * k; cam.z += (Math.max(cam.z, 7.5) - cam.z) * k * 0.5; clampCam(); }
     { let b = document.getElementById('droneBadge'); if (!b) { b = document.createElement('button'); b.id = 'droneBadge'; b.type = 'button'; b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(76px + env(safe-area-inset-top,0px));z-index:45;font:10px var(--display,monospace);padding:8px 12px;border:3px solid #1c1c24;background:#c8302a;color:#fff;box-shadow:3px 3px 0 #1c1c24;cursor:pointer'; b.onclick = () => { P.follow = null; }; document.body.append(b); }
       const on = !!P.follow; b.hidden = !on; if (on) { const nm = P.follow === 'U' ? 'WALI KOTA UDIN' : String(P.follow.w.nama || 'WARGA').toUpperCase().slice(0, 16); const txt = '● DRONE: ' + nm + '  ✕'; if (b.textContent !== txt) b.textContent = txt; } }
     cx.setTransform(1, 0, 0, 1, 0, 0); cx.imageSmoothingEnabled = false;
@@ -380,11 +385,23 @@
       const zq = (c0, r0, c1, r1, col, txt) => { quad(c0, r0, c1, r1, col.replace('A', '0.07'), col.replace('A', '0.55'), 0.9); if (txt && window.SK && cam.z < 4) { const [a, b] = toScreen(...kAt((c0 + c1) / 2, (r0 + r1) / 2)), sc = Math.max(1, Math.round(dpr * 1.5)), w = SK.tw(txt, sc); cx.fillStyle = 'rgba(28,28,36,0.55)'; cx.fillRect(a - w / 2 - 4 * sc, b - 3 * sc, w + 8 * sc, 13 * sc); SK.txt(cx, txt, Math.round(a - w / 2), Math.round(b), sc, col.replace('A', '1').replace('rgba', 'rgba'), null); } };
       zq(-1.5, -4.6, 11.5, -1.0, 'rgba(240,200,60,A)', ''); zq(11.6, -0.7, 14.5, V[V.length - 1] - 0.2, 'rgba(60,200,200,A)', 'TAMAN / CADANGAN'); zq(-1.0, V[V.length - 1] + 0.25, 11.0, VE + 1.4, 'rgba(80,150,255,A)', 'PUSAT KOTA');
       if (window.SK && cam.z >= 1.4 && cam.z < 6) for (let r = 0; r < R; r++) for (const sd of [0, 1]) { const [a, b] = toScreen(...kAt(sd ? 8.6 : 1.4, VR(r) - 0.7 + (r % 2) * 1.4)), t = 'RT ' + String(r * 2 + sd + 1).padStart(2, '0'), sc = Math.max(1, Math.round(dpr)), w = SK.tw(t, sc); cx.fillStyle = 'rgba(255,246,220,0.85)'; cx.fillRect(a - w / 2 - 3 * sc, b - 2 * sc, w + 6 * sc, 10 * sc); SK.txt(cx, t, Math.round(a - w / 2), Math.round(b), sc, '#1c1c24', null); }
+      { // SUNGAI di atas sawah + saluran irigasi ke sawah
+        const tt = performance.now() / 1000, R0 = -6.4, R1 = -5.1;
+        quad(-14.5, R0 - 0.25, 15.5, R1 + 0.25, '#c8b27a'); quad(-14.5, R0, 15.5, R1, '#3d8fc4'); quad(-14.5, R0 + 0.18, 15.5, R1 - 0.18, '#4aa3d8');
+        quad(4.82, R1, 5.18, -4.4, '#c8b27a'); quad(4.88, R1, 5.12, -4.4, '#4aa3d8');
+        const pw = Math.max(2, Math.round(z * 1.3)), PX = (cc, vv, col, w, h) => { const [x1, y1] = toScreen(...kAt(cc, vv)); cx.fillStyle = col; cx.fillRect(Math.round(x1 / pw) * pw, Math.round(y1 / pw) * pw, pw * w, pw * h); };
+        for (let q = 0; q < 220; q++) { const cc = -14.2 + ((q * 0.137 + tt * 0.5) % 29.4 + 29.4) % 29.4, lane = q % 5, vv = R0 + 0.18 + lane * (R1 - R0 - 0.36) / 4 + Math.sin(tt * 2 + q) * 0.03, ph = (tt * 3 + q * 1.7) % 6;
+          if (ph < 4) { PX(cc, vv, lane % 2 ? '#7cc8f0' : '#2f78ad', 3, 1); PX(cc + 0.04, vv - 0.02, lane % 2 ? '#bfe8ff' : '#5fb0e0', 1, 1); } }
+        for (let q = 0; q < 90; q++) { const cc = -14.4 + q * 0.33, f = Math.floor(tt * 4 + q) % 3; PX(cc, R0 + 0.03, f ? '#e8f6ff' : '#9fd6f5', 2, 1); PX(cc + 0.15, R1 - 0.05, f === 1 ? '#e8f6ff' : '#9fd6f5', 2, 1); }
+        for (let q = 0; q < 14; q++) { const k = Math.floor(tt * 2.5 + q * 3.1) % 8; if (k > 2) continue; const cc = -13 + (q * 2.17 % 28), vv = R0 + 0.3 + (q * 0.37 % 0.7); PX(cc, vv, '#ffffff', 1, 1); if (k === 1) { PX(cc - 0.05, vv, '#ffffff', 1, 1); PX(cc + 0.05, vv, '#ffffff', 1, 1); PX(cc, vv - 0.05, '#ffffff', 1, 1); PX(cc, vv + 0.05, '#ffffff', 1, 1); } }
+        { const fp = (tt * 0.25) % 1, fc = -8 + Math.floor(tt * 0.25) * 7.3 % 24; if (fp < 0.25) { const hgt = Math.sin(fp / 0.25 * Math.PI) * 0.35; PX(fc + fp * 1.2, (R0 + R1) / 2 - hgt, '#f0a040', 2, 1); PX(fc + fp * 1.2 - 0.06, (R0 + R1) / 2 - hgt, '#c06020', 1, 1); } }
+        for (let q = 0; q < 8; q++) { const vv = R1 + ((tt * 0.4 + q / 8) % 1) * (-4.4 - R1); PX(5, vv, q % 2 ? '#bfe8ff' : '#7cc8f0', 1, 2); }
+        if (window.SK && cam.z < 4) { const [a2, b2] = toScreen(...kAt(0, (R0 + R1) / 2)), sc = Math.max(1, Math.round(dpr * 1.5)), w = SK.tw('SUNGAI', sc); cx.fillStyle = '#fff'; SK.text ? 0 : 0; cx.font = (10 * sc) + 'px monospace'; cx.fillText('SUNGAI', a2 - w / 2, b2); } }
       { // SAWAH ala terasering: petak dipisah pematang hijau, isi kosong(air)/hijau/kuning bergaris
         const PAL = [['#8ea4b8', '#b6c8d6'], ['#5f9e3a', '#86c255'], ['#c9a63a', '#e6c95a']], C0 = -1.3, C1 = 11.3, V0 = -4.5, V1 = -1.1, nc = 9, nv = 4, dc = (C1 - C0) / nc, dv = (V1 - V0) / nv;
-        quad(C0 - 0.05, V0 - 0.05, C1 + 0.05, V1 + 0.05, '#4f8a2e');
+        
         for (let a = 0; a < nc; a++) for (let b2 = 0; b2 < nv; b2++) { const c0 = C0 + a * dc + 0.07, c1 = C0 + (a + 1) * dc - 0.07, v0 = V0 + b2 * dv + 0.06, v1 = V0 + (b2 + 1) * dv - 0.06; if (c0 < 5.25 && c1 > 4.75) continue;
-          const k = (a * 7 + b2 * 13 + 3) % 10, ty = k < 3 ? 0 : k < 6 ? 1 : 2, [base, hi] = PAL[ty]; quad(c0, v0, c1, v1, base);
+          const k = (a * 7 + b2 * 13 + 3) % 10, ty = k < 3 ? 0 : k < 6 ? 1 : 2, [base, hi] = PAL[ty]; quad(c0 - 0.03, v0 - 0.03, c1 + 0.03, v1 + 0.03, '#6b5a2e'); quad(c0, v0, c1, v1, base);
           cx.strokeStyle = hi; cx.lineWidth = Math.max(1, z * 0.45); cx.beginPath(); const ln = ty === 0 ? 3 : 6;
           for (let q = 1; q < ln; q++) { const vv = v0 + (v1 - v0) * q / ln, [x1, y1] = toScreen(...kAt(c0 + 0.04, vv)), [x2, y2] = toScreen(...kAt(c1 - 0.04, vv)); cx.moveTo(x1, y1); cx.lineTo(x2, y2); }
           cx.stroke();
@@ -398,7 +415,7 @@
       // jalan: tepi lurus (tanpa ujung bulat), bahu jalan lalu badan jalan, persimpangan menyatu
       const RQ = V.map(v => [-0.7, v - 0.14, 10.7, v + 0.14, -0.7, v - 0.105, 10.7, v + 0.105]); RQ.push([4.81, -3.2, 5.19, VE + 4.2, 4.85, -3.2, 5.15, VE + 4.2]);
       { const R2 = ROWS2(); if (R2 > 0) { const V2 = []; for (let r = 0; r <= R2 + 1; r += 2) V2.push(Math.floor(r / 2) * 2.7 + 0.25); const v2e = V2[V2.length - 1];
-        V2.forEach(v => RQ.push([-13.1, v - 0.14, -0.6, v + 0.14, -13.1, v - 0.105, -0.6, v + 0.105])); RQ.push([-7.59, -0.4, -7.21, v2e + 0.2, -7.55, -0.4, -7.25, v2e + 0.2]); } }
+        V2.forEach(v => { const e = v > 3 ? -7.2 : -0.6; RQ.push([-13.1, v - 0.14, e, v + 0.14, -13.1, v - 0.105, e, v + 0.105]); }); RQ.push([-7.59, -0.4, -7.21, v2e + 0.2, -7.55, -0.4, -7.25, v2e + 0.2]); } }
       RQ.forEach(q => quad(q[0], q[1], q[2], q[3], '#8c6a3c')); RQ.forEach(q => quad(q[4], q[5], q[6], q[7], PD || '#d3ad76'));
       cx.strokeStyle = 'rgba(255,240,210,0)'; cx.lineWidth = Math.max(1, z * 0.4); cx.setLineDash([z * 3, z * 3]); cx.beginPath();
       for (const v of V) { const [a, b] = toScreen(...kAt(-0.6, v)), [e, f] = toScreen(...kAt(10.6, v)); cx.moveTo(a, b); cx.lineTo(e, f); }
@@ -424,9 +441,26 @@
       if (window.SIKEPO_WARUNG !== false && WI.complete && WI.naturalWidth) { const [px, py] = POSXY(), wx = px - 2 * KU[0] - 0.1 * KV[0], wy = py - 2 * KU[1] - 0.1 * KV[1]; items.push([wy, () => { const hh = 40 * z, ww = WI.naturalWidth / WI.naturalHeight * hh, [a, b] = toScreen(wx, wy); cx.imageSmoothingEnabled = true; cx.drawImage(WI, Math.round(a - ww / 2), Math.round(b - hh * 0.85), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]); }
       { const RR = ROWS(); for (let r = 0; r <= RR + 1; r += 2) { const v = Math.floor(r / 2) * 2.7 + 0.25; for (let c = 0.5; c < 11; c += 1) { if (c > 4 && c < 6) continue; for (const dv of [-0.45, 0.45]) { const [tx, ty] = kAt(c, v + dv), sd = c * 13 + v * 7 + dv * 5; items.push([ty, () => { const TR = window.__TR || (window.__TR = ['pohon1', 'pohon2', 'pohon3', 'pohon1', 'pohon2', 'kelapa', 'pisang', 'semak1', 'semak2'].map(n => Object.assign(new Image(), { src: 'img/px/' + n + '.png' }))), im = TR[Math.abs(Math.round(sd)) % TR.length]; if (!im.complete || !im.naturalWidth) return;
         const [a, b] = toScreen(tx, ty), hh = (im.src.includes('semak') ? 9 : 22) * z, ww = im.naturalWidth / im.naturalHeight * hh; cx.fillStyle = 'rgba(0,0,0,0.18)'; cx.beginPath(); cx.ellipse(a, b, ww * 0.32, ww * 0.12, 0, 0, 7); cx.fill(); cx.imageSmoothingEnabled = true; cx.drawImage(im, Math.round(a - ww / 2), Math.round(b - hh * 0.95), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]); } } } }
-      { const R2 = ROWS2(); for (let r = 0; r <= R2 + 1 && R2 > 0; r += 2) { const v = Math.floor(r / 2) * 2.7 + 0.25; for (let c = -12.9; c < -1; c += 1) { if (c > -8.4 && c < -6.4) continue; for (const dv of [-0.45, 0.45]) { const [tx, ty] = kAt(c, v + dv), sd = Math.abs(Math.round(c * 13 + v * 7 + dv * 5)); items.push([ty, () => { const TR = window.__TR; if (!TR) return; const im = TR[sd % TR.length]; if (!im.complete || !im.naturalWidth) return; const [a, b] = toScreen(tx, ty), hh = (im.src.includes('semak') ? 9 : 22) * z, ww = im.naturalWidth / im.naturalHeight * hh; cx.imageSmoothingEnabled = true; cx.drawImage(im, Math.round(a - ww / 2), Math.round(b - hh * 0.95), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]); } } } }
+      { const R2 = ROWS2(); for (let r = 0; r <= R2 + 1 && R2 > 0; r += 2) { const v = Math.floor(r / 2) * 2.7 + 0.25; for (let c = -12.9; c < (v > 3 ? -7.8 : -1); c += 1) { if (c > -8.4 && c < -6.4) continue; for (const dv of [-0.45, 0.45]) { const [tx, ty] = kAt(c, v + dv), sd = Math.abs(Math.round(c * 13 + v * 7 + dv * 5)); items.push([ty, () => { const TR = window.__TR; if (!TR) return; const im = TR[sd % TR.length]; if (!im.complete || !im.naturalWidth) return; const [a, b] = toScreen(tx, ty), hh = (im.src.includes('semak') ? 9 : 22) * z, ww = im.naturalWidth / im.naturalHeight * hh; cx.imageSmoothingEnabled = true; cx.drawImage(im, Math.round(a - ww / 2), Math.round(b - hh * 0.95), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]); } } } }
       const gt = GATE(); if (GI.complete && GI.naturalWidth) items.push([gt.y, () => { const hh = 62 * z, ww = GI.naturalWidth / GI.naturalHeight * hh, [a, b] = toScreen(gt.x, gt.y); cx.imageSmoothingEnabled = true; cx.drawImage(GI, Math.round(a - ww * 0.46), Math.round(b - hh * 0.8), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]);
-      items.sort((p, q) => p[0] - q[0]).forEach(([, f]) => f()); }
+      items.sort((p, q) => p[0] - q[0]).forEach(([, f]) => f());
+      if (cam.z < 3.2) { // LABEL KOMPLEK BLOK
+        const blk = (c, v, name, n) => { const [x0, y0] = toScreen(...kAt(c, v)), s1 = Math.round(12 * dpr), s2 = Math.round(9 * dpr); cx.font = 'bold ' + s1 + 'px sans-serif'; const w = Math.max(cx.measureText(name).width, 70 * dpr) + 20 * dpr, h = 36 * dpr, x = x0 - w / 2, y = y0 - h;
+          cx.fillStyle = 'rgba(0,0,0,0.25)'; cx.beginPath(); cx.roundRect(x + 2 * dpr, y + 3 * dpr, w, h, 8 * dpr); cx.fill(); cx.fillStyle = '#fffdf4'; cx.beginPath(); cx.roundRect(x, y, w, h, 8 * dpr); cx.fill(); cx.fillStyle = '#ffd84a'; cx.fillRect(x, y + 6 * dpr, 4 * dpr, h - 12 * dpr);
+          cx.textBaseline = 'middle'; cx.fillStyle = '#1d2a3a'; cx.fillText(name, x + 10 * dpr, y + 13 * dpr); cx.font = s2 + 'px sans-serif'; cx.fillStyle = '#6a7280'; cx.fillText(n + ' rumah', x + 10 * dpr, y + 27 * dpr); cx.textBaseline = 'alphabetic'; };
+        const AB = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; let bi = 0; const cnt = {};
+        for (const h of HS) { const k = (h.d2 ? 'D' : 'U') + Math.floor((h.r - 1.0 + 0.01) / 2.7); cnt[k] = (cnt[k] || 0) + 1; }
+        for (const k of Object.keys(cnt).sort((a, b) => (a[0] === b[0] ? +a.slice(1) - +b.slice(1) : a[0] === 'U' ? -1 : 1))) { const d2 = k[0] === 'D', bk = +k.slice(1), v = bk * 2.7 + 1.55, c = d2 ? (bk >= 1 ? -10.4 : -7.4) : 5; blk(c, v, 'Komplek Blok ' + AB[bi++ % 26], cnt[k]); } }
+      if (cam.z < 1.8) { // PIN LANDMARK ala negara gabut
+        const pin = (x, y, col, ic, name) => { const [a, b0] = toScreen(x, y), r = 13 * dpr, b = b0 - 34 * dpr; cx.strokeStyle = '#fff'; cx.lineWidth = 2 * dpr; cx.beginPath(); cx.moveTo(a, b + r); cx.lineTo(a, b0); cx.stroke();
+          cx.fillStyle = 'rgba(0,0,0,0.25)'; cx.beginPath(); cx.ellipse(a, b0, 4 * dpr, 2 * dpr, 0, 0, 7); cx.fill();
+          cx.fillStyle = '#fff'; cx.beginPath(); cx.arc(a, b, r + 2.5 * dpr, 0, 7); cx.fill(); cx.fillStyle = col; cx.beginPath(); cx.arc(a, b, r, 0, 7); cx.fill();
+          cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.font = Math.round(13 * dpr) + 'px sans-serif'; cx.fillText(ic, a, b + dpr); cx.textAlign = 'left';
+          cx.font = 'bold ' + Math.round(11 * dpr) + 'px sans-serif'; const w = cx.measureText(name).width, lx = a + r + 6 * dpr; cx.fillStyle = 'rgba(255,255,255,0.92)'; cx.beginPath(); cx.roundRect(lx - 4 * dpr, b - 9 * dpr, w + 8 * dpr, 18 * dpr, 9 * dpr); cx.fill(); cx.fillStyle = '#1d2a3a'; cx.fillText(name, lx, b + dpr); cx.textBaseline = 'alphabetic'; };
+        const [px, py] = POSXY(), g2 = GATE(), sw = kAt(5, -2.8), sg = kAt(-4, -5.75);
+        pin(px, py, '#2c4a9e', '👮', 'Pos Satpam'); pin(px - 2 * KU[0] - 0.1 * KV[0], py - 2 * KU[1] - 0.1 * KV[1], '#d9822b', '🍛', 'Warung'); pin(g2.x, g2.y, '#8e2b2b', '⛩', 'Gerbang Kota');
+        pin(sw[0], sw[1], '#5a9e2f', '🌾', 'Sawah Sikepo'); pin(sg[0], sg[1], '#2f86c4', '💧', 'Sungai'); }
+ }
     else { for (const o of list) { if (!udDrawn && o.y > U.y) { drawUdin(cx, night, t); udDrawn = true; } drawWalker(cx, o, t); }
     if (!udDrawn) drawUdin(cx, night, t); }
     }
@@ -469,13 +503,17 @@
   // ---------- input ----------
   function bindInput() {
     const pts = new Map(); let pinch0 = null, moved = 0;
-    cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); moved = 0; if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch0 = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), z: cam.z }; } });
+    let lastT = 0; cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); moved = 0; CAMV.vx = CAMV.vy = 0; CAMV.tz = null; lastT = performance.now(); if (pts.size === 2) { const [a, b] = [...pts.values()]; pinch0 = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), z: cam.z, mx: (a[0] + b[0]) / 2, my: (a[1] + b[1]) / 2 }; } });
     cv.addEventListener('pointermove', e => {
       if (!pts.has(e.pointerId)) return; const p = pts.get(e.pointerId), dx = e.clientX - p[0], dy = e.clientY - p[1]; pts.set(e.pointerId, [e.clientX, e.clientY]);
-      if (pts.size === 2 && pinch0) { const [a, b] = [...pts.values()]; cam.z = pinch0.z * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch0.d; clampCam(); moved += 10; return; }
-      if (Math.abs(dx) + Math.abs(dy) > 3) P.follow = null; cam.x -= dx / cam.z; cam.y -= dy / cam.z; moved += Math.abs(dx) + Math.abs(dy); clampCam();
+      if (pts.size === 2 && pinch0) { const [a, b] = [...pts.values()], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, r = cv.getBoundingClientRect(), [wx, wy] = toWorld(mx - r.left, my - r.top);
+        const z0 = cam.z; cam.z = Math.max(zMin(), Math.min(zMax, pinch0.z * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch0.d)); const k = 1 - z0 / cam.z; cam.x += (wx - cam.x) * k; cam.y += (wy - cam.y) * k;
+        cam.x -= (mx - pinch0.mx) / cam.z; cam.y -= (my - pinch0.my) / cam.z; pinch0.mx = mx; pinch0.my = my; clampCam(); moved += 10; P.follow = null; return; }
+      if (pts.size > 1) return;
+      const now = performance.now(), dtm = Math.max(8, now - lastT); lastT = now;
+      if (Math.abs(dx) + Math.abs(dy) > 3) P.follow = null; cam.x -= dx / cam.z; cam.y -= dy / cam.z; CAMV.vx = CAMV.vx * 0.6 + (-dx / cam.z) / dtm * 1000 * 0.4; CAMV.vy = CAMV.vy * 0.6 + (-dy / cam.z) / dtm * 1000 * 0.4; moved += Math.abs(dx) + Math.abs(dy); clampCam();
     });
-    const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch0 = null;
+    const up = e => { pts.delete(e.pointerId); if (pts.size < 2) pinch0 = null; if (performance.now() - lastT > 80 || moved < 6) CAMV.vx = CAMV.vy = 0;
       if (moved < (e.pointerType === 'touch' ? 14 : 6) && e.type === 'pointerup') { const r = cv.getBoundingClientRect(), [wx, wy] = toWorld(e.clientX - r.left, e.clientY - r.top); let best = null, bd = 9 / Math.max(1, cam.z / 3);
         if (Math.hypot(U.x - wx, (U.y - 7) - wy) < Math.max(6, 10 / Math.max(1, cam.z / 3))) { sapa(); P.follow = 'U'; return; }
         for (const o of P.walkers) { const d = Math.hypot(o.x - wx, (o.y - 5) - wy); if (d < bd) { bd = d; best = o; } }
@@ -483,7 +521,7 @@
         if (!best && inDia(wx, wy + 4, PLOT, -4) && P.onSawit) { P.onSawit(); return; }
         P.sel = best; P.follow = best || null; P.onPick && P.onPick(best ? best.w : null); } };
     cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
-    cv.addEventListener('wheel', e => { e.preventDefault(); const r = cv.getBoundingClientRect(), [wx, wy] = toWorld(e.clientX - r.left, e.clientY - r.top); const z0 = cam.z; cam.z *= e.deltaY < 0 ? 1.15 : 1 / 1.15; clampCam(); const k = 1 - z0 / cam.z; cam.x += (wx - cam.x) * k; cam.y += (wy - cam.y) * k; clampCam(); }, { passive: false });
+    cv.addEventListener('wheel', e => { e.preventDefault(); const r = cv.getBoundingClientRect(); CAMV.ax = e.clientX - r.left; CAMV.ay = e.clientY - r.top; CAMV.tz = Math.max(zMin(), Math.min(zMax, (CAMV.tz || cam.z) * Math.exp(-e.deltaY * 0.0015))); }, { passive: false });
     window.addEventListener('resize', resize);
   }
 
@@ -496,7 +534,7 @@
     add(w) { const o = addWalker(w, true); houseSpots(P.walkers.length); P.hl.add(w.no); setTimeout(() => P.hl.delete(w.no), 15000); return o; },
     focus(no) { const o = P.byNo.get(no); if (!o) return false; P.sel = o; P.follow = o; const z0 = cam.z, x0 = cam.x, y0 = cam.y, z1 = Math.max(5, z0), t0 = performance.now();
       const go = ts => { const k = Math.min(1, (ts - t0) / 700), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; cam.x = x0 + (o.x - x0) * e; cam.y = y0 + (o.y - 8 - y0) * e; cam.z = z0 + (z1 - z0) * e; clampCam(); if (k < 1) requestAnimationFrame(go); }; requestAnimationFrame(go); return true; },
-    zoom(f) { cam.z *= f; clampCam(); },
+    zoom(f) { if (!cv) return; CAMV.ax = cv.width / dpr / 2; CAMV.ay = cv.height / dpr / 2; CAMV.tz = Math.max(zMin(), Math.min(zMax, (CAMV.tz || cam.z) * f)); },
     reset() { const kc = SMODE ? [GATE().x + 10, GATE().y - 50] : [ISL.cx, ISL.cy]; cam = { x: kc[0], y: kc[1], z: Math.max(zMin(), SMODE ? 2.2 : 2.6) }; clampCam(); P.sel = null; },
     showAll(v) { P.showAll = v; },
     onPick(f) { P.onPick = f; },
