@@ -17,7 +17,7 @@
     gua: PX(['............', '...aaaaaa...', '..aabbbbaa..', '.aab.bb.baa.', '.abcbbbbcba.', '.abbbbbbbba.', '.abdbdbdbba.', '.abbbbbbbba.', '............', '............', '............', '............'], { a: '#5a6680', b: '#0a0608', c: '#ff5a2a', d: '#e8e0d0' }),
     bengkel: PX(['............', '..aaaa......', '..aaaab.....', '...aa.b.....', '......b.....', '......b.....', '...cccccc...', '..cccccccc..', '....cccc....', '...cccccc...', '............', '............'], { a: '#c8c8d8', b: '#a8763e', c: '#6a6a76' })
   };
-  document.querySelectorAll('.ic').forEach(i => { const k = [...i.classList].find(c => c.startsWith('ic-')).slice(3); if (ICON[k]) i.style.backgroundImage = ICON[k]; });
+  ICON.game = ICON.game || "url('img/ic_game.png')"; document.querySelectorAll('.ic').forEach(i => { const k = [...i.classList].find(c => c.startsWith('ic-')).slice(3); if (ICON[k]) i.style.backgroundImage = ICON[k]; });
 
   // ---------- bar cari, jam, siaran, penghitung ----------
   const slot = $('ui-cari-slot'), cari = $('cari'); if (slot && cari) { slot.append(cari); const q = $('q'); if (q) q.placeholder = 'Cari warga…'; }
@@ -56,7 +56,19 @@
   let kTab = 'siaran';
   function kabar() { const b = $('kabarB'); b.innerHTML = '';
     const tabs = document.createElement('div'); tabs.className = 'k-tabs';
-    [['siaran', 'SIARAN'], ['usulan', 'USULAN'], ['kerja', 'PEKERJAAN']].forEach(([k, l]) => { const t = document.createElement('button'); t.type = 'button'; t.textContent = l; if (kTab === k) t.className = 'on'; t.onclick = () => { kTab = k; kabar(); }; tabs.append(t); }); b.append(tabs);
+    [['siaran', 'SIARAN'], ['usulan', 'USULAN'], ['kerja', 'PEKERJAAN'], ['skor', 'SKOR']].forEach(([k, l]) => { const t = document.createElement('button'); t.type = 'button'; t.textContent = l; if (kTab === k) t.className = 'on'; t.onclick = () => { kTab = k; kabar(); }; tabs.append(t); }); b.append(tabs);
+    if (kTab === 'skor') {
+      const h = document.createElement('div'); h.className = 'k-box'; h.innerHTML = '<b>PAPAN SKOR JAGA SAWAH</b><p>Main di tab GAME. Punya Kartu Warga? Skormu otomatis masuk sini. Pecahkan rekor, masuk berita kota!</p>'; b.append(h);
+      const L = document.createElement('p'); L.className = 'k-empty'; L.textContent = 'Memuat...'; b.append(L);
+      (window.DATA && DATA.skorList ? DATA.skorList() : Promise.resolve([])).then(S => { L.remove(); if (kTab !== 'skor') return;
+        if (!S.length) { const e = document.createElement('p'); e.className = 'k-empty'; e.textContent = 'Belum ada skor. Jadilah penjaga sawah pertama!'; b.append(e); return; }
+        const best = {}; S.forEach(x => { if (!best[x.no] || x.skor > best[x.no].skor) best[x.no] = x; });
+        const top = Object.values(best).sort((p, q) => q.skor - p.skor).slice(0, 10), t2 = document.createElement('b'); t2.textContent = 'TOP 10'; t2.style.display = 'block'; t2.style.margin = '10px 0 4px'; b.append(t2);
+        top.forEach((x, k) => { const r = document.createElement('div'); r.className = 'k-us' + (k ? '' : ' top'); const a = document.createElement('b'); a.textContent = (k + 1) + '. ' + x.nama; const c = document.createElement('small'); c.textContent = x.skor + ' poin · ronde ' + x.ronde; r.append(a, c); b.append(r); });
+        let mx = 0; const rek = []; S.forEach(x => { if (x.skor > mx) { rek.push(x); mx = x.skor; } });
+        const t3 = document.createElement('b'); t3.textContent = 'BERITA REKOR'; t3.style.display = 'block'; t3.style.margin = '14px 0 4px'; b.append(t3);
+        rek.reverse().slice(0, 8).forEach(x => { const a = document.createElement('article'); a.className = 'k-item'; const tg = document.createElement('span'); tg.className = 'ui-tag'; tg.textContent = new Date(x.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }); const hh = document.createElement('b'); hh.textContent = '🏆 REKOR BARU! ' + x.nama + ' (#' + x.no + ')'; const pp = document.createElement('p'); pp.textContent = 'Jaga sawah sampai ronde ' + x.ronde + ' dengan skor ' + x.skor + '. Pak Udin bangga!'; a.append(tg, hh, pp); b.append(a); }); });
+      return; }
     if (kTab === 'kerja') {
       const h = document.createElement('div'); h.className = 'k-box'; h.innerHTML = '<b>PEKERJAAN WARGA</b><p>Mau kerja apa di Kota Sikepo? Komen di video terbaru Wali Kota Udin, nanti dicatat di sini.</p>'; b.append(h);
       const J = window.SIKEPO_JOBS || [], col = { 'BEKERJA': '#2a8a4a', 'NUNGGU GEDUNG': '#c07a10', 'DIPENJARA': '#c8302a' };
@@ -80,7 +92,7 @@
   function nav(v) { document.querySelectorAll('#uiNav button').forEach(b => b.toggleAttribute('aria-current', b.dataset.v === v)); }
   function open(v) { closeAll(); nav(v);
     if (v === 'guild') { guild(); $('sheetGuild').hidden = false; } else if (v === 'kabar') { kabar(); $('sheetKabar').hidden = false; } else if (v === 'siaran') { tick(); $('sheetSiaran').hidden = false; }
-    else if (v === 'kartu') document.body.classList.add('v-kartu'); else if (v === 'tavern') { openTavern(); nav('peta'); } }
+    else if (v === 'kartu') document.body.classList.add('v-kartu'); else if (v === 'tavern') { openTavern(); nav('peta'); } else if (v === 'game' && window.JAGASAWAH) JAGASAWAH.open(); }
   function openTavern() { const st = ST(); if (window.TAVERN) TAVERN.open(st.mine, st.warga); chatInit(); }
   document.querySelectorAll('#uiNav button').forEach(b => b.onclick = () => open(b.dataset.v));
   document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => { closeAll(); nav('peta'); });

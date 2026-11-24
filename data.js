@@ -88,6 +88,17 @@
       if (error) throw { kode: /terlalu_cepat/.test(error.message) ? 'terlalu_cepat' : error.code === '42501' ? 'perlu_kartu' : 'gagal', pesan: error.message };
     },
     onChat(f) { chatL.push(f); },
+    // ---- skor game JAGA SAWAH (syarat kirim: punya kartu) ----
+    async skorList() {
+      if (!live) return [];
+      const { data, error } = await sb.from('skor').select('no,nama,skor,ronde,created_at').order('created_at', { ascending: true }).limit(1000);
+      if (error) return []; return data || [];
+    },
+    async skorSend(skor, ronde) {
+      if (!live) throw { kode: 'demo' };
+      const { error } = await sb.from('skor').insert({ skor, ronde });
+      if (error) throw { kode: /terlalu_cepat/.test(error.message) ? 'terlalu_cepat' : error.code === '42501' ? 'perlu_kartu' : 'gagal', pesan: error.message };
+    },
     // ---- akun Google ----
     akun() { if (!user || user.is_anonymous || !user.email) return null; const m = user.user_metadata || {}; return { email: user.email, nama: m.full_name || m.name || user.email.split('@')[0], foto: m.avatar_url || m.picture || '' }; },
     onAuth(f) { authL.push(f); },

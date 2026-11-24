@@ -28,7 +28,7 @@
         b.x += b.vx * dt; b.y += b.vy * dt; if (b.life > 0) { if (b.x < 8 || b.x > W - 8) b.vx *= -1; if (b.y < 12) b.vy = Math.abs(b.vy); if (b.y > 140) b.vy = -Math.abs(b.vy); if (Math.random() < dt * 0.8) b.vy *= -1; }
         if (b.y < -20) { b.gone = true; b.esc = true; } }
       if (s.birds.every(b => b.gone)) { const hit = s.birds.filter(b => b.dead).length, esc = s.birds.filter(b => b.esc).length; s.hitsRound += hit; s.padi = Math.max(0, s.padi - esc * 5); s.phase = 'udin'; s.ut = 0; s.uok = hit > 0; s.got = s.birds.filter(b => b.dead).map(b => b.kind); s.ux = hit ? Math.max(40, Math.min(216, s.dropX || 128)) : 128; s.msg = !hit ? 'YAAH... PADINYA DIMAKAN!' : esc ? 'DAPET SATU, SATUNYA KABUR!' : 'DIPUNGUT PAK UDIN!'; } }
-    else if (s.phase === 'udin') { s.ut += dt; if (s.ut > 1.6) { if (s.padi <= 0) { s.phase = 'over'; s.msg = 'GAGAL PANEN! SKOR ' + s.score; } else if (s.wave >= 5) { s.phase = 'ronde'; s.ut = 0; s.msg = 'RONDE ' + s.round + ' SELESAI!'; } else spawn(); } }
+    else if (s.phase === 'udin') { s.ut += dt; if (s.ut > 1.6) { if (s.padi <= 0) { s.phase = 'over'; s.msg = 'GAGAL PANEN! SKOR ' + s.score; kirim(s); } else if (s.wave >= 5) { s.phase = 'ronde'; s.ut = 0; s.msg = 'RONDE ' + s.round + ' SELESAI!'; } else spawn(); } }
     else if (s.phase === 'ronde') { s.ut += dt; if (s.ut > 1.6) newRound(); } }
   function draw() { const s = st; bg(s.t); for (const b of s.birds) if (!b.gone || b.dead) drawBird(b);
     if (s.flash > 0) { cx.fillStyle = 'rgba(255,255,255,' + s.flash * 2 + ')'; cx.fillRect(0, 0, W, H); }
@@ -44,11 +44,13 @@
     if (s.phase !== 'fly' || s.ammo <= 0) return; s.ammo--; s.flash = 0.06; let hit = false;
     for (const b of s.birds) if (!b.dead && !b.gone && Math.abs(b.x - mx) < 18 && Math.abs(b.y - my) < 15) { b.dead = true; hit = true; s.score += 100 * s.round + (b.kind === 2 ? 200 : 0); }
     if (!hit && s.ammo <= 0) for (const b of s.birds) if (!b.dead) b.life = 0; }
+  function kirim(s) { const el = document.getElementById('gameInfo'); if (!el || !window.DATA || !s.score) return; el.textContent = 'Mengirim skor...';
+    DATA.skorSend(s.score, s.round).then(() => { el.textContent = 'Skor ' + s.score + ' tercatat! Cek peringkat di KABAR > SKOR.'; }).catch(e => { el.textContent = e.kode === 'perlu_kartu' ? 'Bikin Kartu Warga dulu biar skormu masuk papan skor & berita!' : e.kode === 'terlalu_cepat' ? 'Tunggu sebentar sebelum kirim skor lagi.' : e.kode === 'demo' ? '' : 'Skor gagal dikirim.'; }); }
   function loop(ts) { const dt = Math.min(0.05, (ts - (st.last || ts)) / 1000); st.last = ts; tick(dt); draw(); raf = requestAnimationFrame(loop); }
   window.JAGASAWAH = { _st: () => st, open() { let ov = document.getElementById('gameOv'); if (!ov) { ov = document.createElement('div'); ov.id = 'gameOv';
-      ov.innerHTML = '<div class="g-box"><div class="g-h"><b>JAGA SAWAH</b><button type="button" class="ui-x" id="gameX">×</button></div><canvas id="gameCv" width="256" height="240"></canvas><p class="g-tip">Burung pipit mau makan padi! Ketuk burungnya. 3 peluru per gelombang, jaga bar PADI jangan habis.</p></div>';
+      ov.innerHTML = '<div class="g-box"><div class="g-h"><b>JAGA SAWAH</b><button type="button" class="ui-x" id="gameX">×</button></div><canvas id="gameCv" width="256" height="240"></canvas><p class="g-tip">Burung pipit mau makan padi! Ketuk burungnya. 3 peluru per gelombang, jaga bar PADI jangan habis.</p><p class="g-tip" id="gameInfo" style="font-weight:700;color:#c8302a"></p></div>';
       document.body.append(ov); document.getElementById('gameX').onclick = () => JAGASAWAH.close(); cv = document.getElementById('gameCv'); cx = cv.getContext('2d'); cx.imageSmoothingEnabled = false;
       cv.addEventListener('pointerdown', e => { const r = cv.getBoundingClientRect(); shoot((e.clientX - r.left) / r.width * W, (e.clientY - r.top) / r.height * H); }); }
       ov.hidden = false; st = { t: 0, phase: 'start', round: 0, score: 0, padi: 100, ammo: 3, birds: [], wave: 0, flash: 0, msg: 'JAGA SAWAH', spawn }; cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); },
-    close() { const ov = document.getElementById('gameOv'); if (ov) ov.hidden = true; cancelAnimationFrame(raf); } };
+    close() { const ov = document.getElementById('gameOv'); if (ov) ov.hidden = true; cancelAnimationFrame(raf); const pb = document.querySelector('#uiNav button[data-v="peta"]'); if (pb) pb.click(); } };
 })();
