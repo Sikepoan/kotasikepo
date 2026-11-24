@@ -56,7 +56,12 @@
   let kTab = 'siaran';
   function kabar() { const b = $('kabarB'); b.innerHTML = '';
     const tabs = document.createElement('div'); tabs.className = 'k-tabs';
-    [['siaran', 'SIARAN'], ['usulan', 'USULAN']].forEach(([k, l]) => { const t = document.createElement('button'); t.type = 'button'; t.textContent = l; if (kTab === k) t.className = 'on'; t.onclick = () => { kTab = k; kabar(); }; tabs.append(t); }); b.append(tabs);
+    [['siaran', 'SIARAN'], ['usulan', 'USULAN'], ['kerja', 'PEKERJAAN']].forEach(([k, l]) => { const t = document.createElement('button'); t.type = 'button'; t.textContent = l; if (kTab === k) t.className = 'on'; t.onclick = () => { kTab = k; kabar(); }; tabs.append(t); }); b.append(tabs);
+    if (kTab === 'kerja') {
+      const h = document.createElement('div'); h.className = 'k-box'; h.innerHTML = '<b>PEKERJAAN WARGA</b><p>Mau kerja apa di Kota Sikepo? Komen di video terbaru Wali Kota Udin, nanti dicatat di sini.</p>'; b.append(h);
+      const J = window.SIKEPO_JOBS || [], col = { 'BEKERJA': '#2a8a4a', 'NUNGGU GEDUNG': '#c07a10', 'DIPENJARA': '#c8302a' };
+      J.forEach(([u, j, st]) => { const r = document.createElement('div'); r.className = 'k-us'; const a = document.createElement('b'); a.textContent = j; const c = document.createElement('small'); c.textContent = u + ' · '; const sp = document.createElement('span'); sp.textContent = st; sp.style.color = col[st] || '#555'; sp.style.fontWeight = '700'; c.append(sp); r.append(a, c); b.append(r); });
+      return; }
     if (kTab === 'usulan') {
       const h = document.createElement('div'); h.className = 'k-box'; h.innerHTML = '<b>USULAN BANGUNAN</b><p>Komen usulan bangunan di video terbaru Wali Kota Udin. Usulan dengan like terbanyak dibangun besoknya.</p>'; b.append(h);
       const U = window.SIKEPO_USULAN || [];
