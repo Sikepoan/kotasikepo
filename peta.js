@@ -420,7 +420,11 @@
         V2.forEach(v => { const e = v > 3 ? -7.2 : -0.6; RQ.push([-13.1, v - 0.14, e, v + 0.14, -13.1, v - 0.105, e, v + 0.105]); }); RQ.push([-7.59, -0.4, -7.21, v2e + 0.2, -7.55, -0.4, -7.25, v2e + 0.2]); } }
       { const GV = 5.2, R = (c0, v0, c1, v1, h) => RQ.push(h ? [c0, v0 - 0.14, c1, v0 + 0.14, c0, v0 - 0.105, c1, v0 + 0.105] : [c0 - 0.14, v0, c0 + 0.14, v1, c0 - 0.105, v0, c0 + 0.105, v1]);
         R(10.6, 2.95, 12.2, 0, 1); R(-6.6, GV, -0.75, 0, 1); R(-0.75, 2.81, 0, GV + 0.14, 0); for (let k = 0; k < 6; k++) { const cc = -6.15 + (k % 3) * 1.45, vv = GV - 0.55 + Math.floor(k / 3) * 1.75; R(cc, Math.min(vv, GV), 0, Math.max(vv, GV), 0); } }
-      RQ.forEach(q => quad(q[0], q[1], q[2], q[3], '#8c6a3c')); RQ.forEach(q => quad(q[4], q[5], q[6], q[7], PD || '#d3ad76'));
+      RQ.forEach(q => quad(q[0], q[1], q[2], q[3], '#9a9a9a')); RQ.forEach(q => quad(q[4], q[5], q[6], q[7], '#3f4148'));
+      cx.strokeStyle = '#f2f2f2'; cx.lineWidth = Math.max(1, z * 0.7); cx.setLineDash([z * 5, z * 5]); cx.beginPath();
+      RQ.forEach(q => { const hor = (q[6] - q[4]) > (q[7] - q[5]); if (hor) { const v = (q[5] + q[7]) / 2, [a1, b1] = toScreen(...kAt(q[4] + 0.1, v)), [e1, f1] = toScreen(...kAt(q[6] - 0.1, v)); cx.moveTo(a1, b1); cx.lineTo(e1, f1); } else { const c = (q[4] + q[6]) / 2, [a1, b1] = toScreen(...kAt(c, q[5] + 0.1)), [e1, f1] = toScreen(...kAt(c, q[7] - 0.1)); cx.moveTo(a1, b1); cx.lineTo(e1, f1); } });
+      cx.stroke(); cx.setLineDash([]);
+      for (const v of V) for (let k = 0; k < 5; k++) { const cz = 4.72 + k * 0.13; quad(cz, v + 0.16, cz + 0.06, v + 0.38, '#f2f2f2'); quad(cz, v - 0.38, cz + 0.06, v - 0.16, '#f2f2f2'); }
       cx.strokeStyle = 'rgba(255,240,210,0)'; cx.lineWidth = Math.max(1, z * 0.4); cx.setLineDash([z * 3, z * 3]); cx.beginPath();
       for (const v of V) { const [a, b] = toScreen(...kAt(-0.6, v)), [e, f] = toScreen(...kAt(10.6, v)); cx.moveTo(a, b); cx.lineTo(e, f); }
       { const [a, b] = toScreen(...kAt(5, -0.4)), [e, f] = toScreen(...kAt(5, VE + 4.1)); cx.moveTo(a, b); cx.lineTo(e, f); } cx.stroke(); cx.setLineDash([]); }
@@ -442,6 +446,10 @@
       const PI = window.__PI || (window.__PI = Object.assign(new Image(), { src: 'img/pos3d.png' }));
       if (PI.complete && PI.naturalWidth) { const RR = ROWS(); let vL = 0; for (let r = 0; r <= RR + 1; r += 2) vL = Math.floor(r / 2) * 2.7 + 0.25; for (const v of [vL]) { const [px, py] = kAt(6.0, v + 1.15); items.push([py, () => { const hh = 34 * z, ww = PI.naturalWidth / PI.naturalHeight * hh, [a, b] = toScreen(px, py); cx.imageSmoothingEnabled = true; cx.drawImage(PI, Math.round(a - ww / 2), Math.round(b - hh * 0.85), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]); } }
       const WI = window.__WI || (window.__WI = Object.assign(new Image(), { src: 'img/warung3d.png' }));
+      { const LP = [], RN = roadNodes(); for (const v of RN) for (let c = 0.2; c < 10.4; c += 1.6) if (!(c > 4.3 && c < 5.7)) LP.push([c, v + 0.24]); for (let v = 0; v < (RN[RN.length - 1] || 0) + 3; v += 2) LP.push([5.3, v + 1.1]);
+        const nt = nightK(window.SIKEPO_FORCE_HOUR ?? wibHour());
+        LP.forEach(([c, v]) => { const [x, y] = kAt(c, v); items.push([y, () => { const [a, b] = toScreen(x, y), u = z; cx.fillStyle = '#3a3f48'; cx.fillRect(a - 0.6 * u, b - 19 * u, 1.2 * u, 19 * u); cx.fillRect(a, b - 19 * u, 4 * u, 1 * u); cx.fillStyle = '#2a2e36'; cx.fillRect(a + 2.5 * u, b - 20 * u, 4 * u, 2 * u); cx.fillStyle = nt > 0.4 ? '#fff3a0' : '#ffe58a'; cx.fillRect(a + 3 * u, b - 18.4 * u, 3 * u, 1 * u);
+          if (nt > 0.4) { const g = cx.createRadialGradient(a + 4.5 * u, b - 17 * u, 0, a + 4.5 * u, b - 17 * u, 22 * u); g.addColorStop(0, 'rgba(255,220,120,' + 0.35 * nt + ')'); g.addColorStop(1, 'rgba(255,220,120,0)'); cx.fillStyle = g; cx.fillRect(a - 20 * u, b - 40 * u, 50 * u, 50 * u); } }]); }); }
       { // KAWASAN IBADAH 6 agama + MENARA UDIN
   const quad = (c0, r0, c1, r1, fill, line, lw) => { const P = [kAt(c0, r0), kAt(c1, r0), kAt(c1, r1), kAt(c0, r1)].map(q => toScreen(...q)); cx.beginPath(); P.forEach(([a, b], i) => i ? cx.lineTo(a, b) : cx.moveTo(a, b)); cx.closePath(); if (fill) { cx.fillStyle = fill; cx.fill(); } if (line) { cx.strokeStyle = line; cx.lineWidth = Math.max(1, z * (lw || 0.6)); cx.stroke(); } };
         const IBN = ['masjid', 'gereja', 'katedral', 'pura', 'vihara', 'klenteng'], IM = window.__IB || (window.__IB = Object.fromEntries([...IBN, 'menara'].map(n => [n, Object.assign(new Image(), { src: 'img/' + n + '.png' })])));
