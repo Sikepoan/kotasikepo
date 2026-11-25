@@ -91,3 +91,10 @@ window.SIKEPO_JOBS = [
   ['@faleh.akbar', 'Tukang Warnet (Falih)', 'NUNGGU GEDUNG'],
   ['@zayyanalfarizi945', 'Pembalap Drag', 'NUNGGU GEDUNG']
 ];
+// Usulan bangunan dari komentar Day 8 (jumlah suara/permintaan). [nama, suara, status]
+window.SIKEPO_USULAN = [
+  ['Sekolah', 22, 'POLLING BESOK'], ['Warung Madura', 6, 'POLLING BESOK'], ['Stasiun Kereta', 2, 'POLLING BESOK'],
+  ['Markas Tentara / TNI', 9, 'ANTRE'], ['Lapangan Bola / Stadion', 5, 'ANTRE'], ['Kopdes', 3, 'ANTRE'], ['Bandara', 3, 'ANTRE'], ['Taman Kota', 2, 'SUDAH ADA LAHAN'],
+  ['Kos-kosan', 1, 'ANTRE'], ['Kolam Renang', 1, 'ANTRE'], ['Warnet', 1, 'ANTRE'], ['Pom Bensin', 1, 'ANTRE'], ['Pesantren', 1, 'ANTRE'], ['Bank', 2, 'ANTRE'], ['Kantor Presiden', 1, 'ANTRE'], ['Musim (hujan/salju/kemarau)', 1, 'IDE FITUR'],
+  ['Minimarket', 20, 'SUDAH DIBANGUN'], ['Pemadam Kebakaran', 14, 'SUDAH DIBANGUN'], ['Rumah Sakit', 9, 'SUDAH DIBANGUN'], ['Masjid & Gereja (6 rumah ibadah)', 8, 'SUDAH DIBANGUN'], ['Kantor Polisi', 4, 'SUDAH DIBANGUN'], ['Sawah', 3, 'SUDAH DIBANGUN']
+];
