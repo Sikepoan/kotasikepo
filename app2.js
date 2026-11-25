@@ -71,7 +71,7 @@
       return; }
     if (kTab === 'kerja') {
       const h = document.createElement('div'); h.className = 'k-box'; h.innerHTML = '<b>PEKERJAAN WARGA</b><p>Mau kerja apa di Kota Sikepo? Komen di video terbaru Wali Kota Udin, nanti dicatat di sini.</p>'; b.append(h);
-      const J = window.SIKEPO_JOBS || [], col = { 'BEKERJA': '#2a8a4a', 'NUNGGU GEDUNG': '#c07a10', 'DIPENJARA': '#c8302a' };
+      const J = window.SIKEPO_JOBS || [], col = { 'BEKERJA': '#2a8a4a', 'NUNGGU GEDUNG': '#c07a10', 'DIPENJARA': '#c8302a', 'INSAF': '#2a6fd8' };
       J.forEach(([u, j, st]) => { const r = document.createElement('div'); r.className = 'k-us'; const a = document.createElement('b'); a.textContent = j; const c = document.createElement('small'); c.textContent = u + ' · '; const sp = document.createElement('span'); sp.textContent = st; sp.style.color = col[st] || '#555'; sp.style.fontWeight = '700'; c.append(sp); r.append(a, c); b.append(r); });
       return; }
     if (kTab === 'usulan') {
