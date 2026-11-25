@@ -289,3 +289,5 @@ body.app:has(#pick:not([hidden])) .ui-count { display: block; }
 #gameOv .g-tip{margin:0;padding:8px 12px;font-size:12px}
 #gameBtn{position:fixed;left:12px;bottom:96px;z-index:40;background:#c8302a;color:#fff;border:3px solid #1c1c24;box-shadow:3px 3px 0 #1c1c24;padding:8px 10px;font:inherit;font-size:12px;cursor:pointer}
 #gameOv .g-tip{color:#1c1c24}
+#kotaToast{position:fixed;left:50%;top:74px;transform:translate(-50%,-140%);z-index:60;background:#1c1c24;color:#fff6dc;border:3px solid #ffd84a;box-shadow:3px 3px 0 #000;padding:8px 14px;font-size:13px;font-weight:700;max-width:90vw;transition:transform .35s}
+#kotaToast.on{transform:translate(-50%,0)}

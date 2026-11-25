@@ -119,3 +119,6 @@
   document.body.classList.add('app'); setInterval(tick, 2000); setTimeout(tick, 400); setTimeout(() => window.PETA && PETA.resize && PETA.resize(), 50);
   if (location.hash === '#kartu') setTimeout(() => open('kartu'), 300);
 })();
+// ===== toast kejadian kota (kebakaran / kemalingan) =====
+window.addEventListener('kabarKota', e => { let t = document.getElementById('kotaToast'); if (!t) { t = document.createElement('div'); t.id = 'kotaToast'; document.body.append(t); }
+  t.textContent = e.detail; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 6000); });
