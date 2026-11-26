@@ -39,7 +39,7 @@
   function status(msg, err) { const s = $('status'); s.textContent = msg; s.classList.toggle('err', !!err); }
 
   function showMine(w) {
-    ST.mine = w; $('daftar').hidden = true; $('punya').hidden = false;
+    ST.mine = w; window.__mineNo = w && w.no; window.dispatchEvent(new Event('mineNo')); $('daftar').hidden = true; $('punya').hidden = false;
     $('punyaTxt').textContent = `Nomor induk ${pad(w.no)} atas nama ${w.nama}. Namamu sudah jalan-jalan di peta Kota Sikepo.`;
     const rs = SK.render(cardData(w, 'story')), rk = SK.render(cardData(w, 'kartu'));
     $('dlStory').href = rs.big.toDataURL('image/png'); $('dlStory').download = fname(w, 'story');

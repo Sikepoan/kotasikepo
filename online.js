@@ -5,8 +5,10 @@
   try { if (window.supabase && C.SUPABASE_URL && C.SUPABASE_ANON_KEY) {
       const sb = window.supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false, storageKey: 'sikepo-online' } });
       const id = Math.random().toString(36).slice(2), ch = sb.channel('online-kota', { config: { presence: { key: id } } });
-      ch.on('presence', { event: 'sync' }, () => setN(Object.keys(ch.presenceState()).length))
-        .subscribe(st => { if (st === 'SUBSCRIBED') ch.track({ t: Date.now() }); });
+      const sync = () => { const S = ch.presenceState(), on = new Set(); Object.values(S).forEach(a => a.forEach(m => { if (m.no) on.add(m.no); })); if (window.__mineNo) on.add(window.__mineNo); window.SIKEPO_ONLINE = on; setN(Object.keys(S).length); };
+      ch.on('presence', { event: 'sync' }, sync)
+        .subscribe(st => { if (st === 'SUBSCRIBED') ch.track({ t: Date.now(), no: window.__mineNo || null }); });
+      window.addEventListener('mineNo', () => { ch.track({ t: Date.now(), no: window.__mineNo || null }); sync(); });
     } } catch (e) {}
   const HARI = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'], BLN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
   function tgl() { const d = new Date(Date.now() + 7 * 3600e3); return HARI[d.getUTCDay()] + ', ' + d.getUTCDate() + ' ' + BLN[d.getUTCMonth()]; }
