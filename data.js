@@ -35,7 +35,8 @@
       if (!live) return demo().warga;
       const out = []; let from = 0;
       for (;;) {   // ambil per 1000 baris
-        const { data, error } = await sb.from('warga').select('no,nama,kat,av,hari,created_at').order('no').range(from, from + 999);
+        let { data, error } = await sb.from('warga').select('no,nama,kat,av,hari,created_at,sosmed').order('no').range(from, from + 999);
+        if (error) ({ data, error } = await sb.from('warga').select('no,nama,kat,av,hari,created_at').order('no').range(from, from + 999));
         if (error) throw error; out.push(...data); if (data.length < 1000) break; from += 1000;
       }
       return out;
@@ -65,7 +66,9 @@
         if (error) throw { kode: 'login_gagal', pesan: error.message };
         uid = data.user.id;
       }
-      const { data, error } = await sb.from('warga').insert(row).select('no,nama,kat,av,hari,created_at').single();
+      let { data, error } = await sb.from('warga').insert(row).select('no,nama,kat,av,hari,created_at').single();
+      if (error && /sosmed/.test(error.message || '')) { const r2 = { ...row }; delete r2.sosmed; ({ data, error } = await sb.from('warga').insert(r2).select('no,nama,kat,av,hari,created_at').single()); }
+      if (data && row.sosmed) data.sosmed = row.sosmed;
       if (error) {
         if (error.code === '23505') throw { kode: 'nama_dipakai' };
         if (error.code === '42501') throw { kode: 'sudah_daftar' };

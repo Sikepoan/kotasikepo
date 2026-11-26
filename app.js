@@ -17,7 +17,8 @@
   function formData() {
     const nama = cleanNama($('nama').value), kat = document.querySelector('input[name=kat]:checked').value;
     const nextNo = ST.warga.reduce((m, w) => Math.max(m, w.no), 0) + 1;
-    return { nama, no: nextNo, kat: FANT() ? 'WARGA' : kat, av: ST.av, hari: (ST.stats && ST.stats.hari) || 1 };
+    const sosmed = (($('sosmed') && $('sosmed').value) || '').trim().replace(/[^@a-zA-Z0-9._]/g, '').slice(0, 40);
+    return { nama, sosmed, no: nextNo, kat: FANT() ? 'WARGA' : kat, av: ST.av, hari: (ST.stats && ST.stats.hari) || 1 };
   }
   function preview() { if (ST.mine) return drawTo($('prev'), cardData(ST.mine, 'story')); drawTo($('prev'), cardData(formData(), 'story')); }
   function buildAvs() {
@@ -112,7 +113,7 @@
     if (d.nama.length < 2) { status('Nama minimal 2 karakter (huruf, angka, titik, garis bawah, @, spasi).', true); $('nama').focus(); return; }
     $('kirim').disabled = true; status('Mendaftarkan kartu…');
     try {
-      const w = await DATA.daftar({ nama: d.nama, kat: d.kat, av: d.av, hari: d.hari });
+      const w = await DATA.daftar({ nama: d.nama, kat: d.kat, av: d.av, hari: d.hari, sosmed: d.sosmed || null });
       if (!ST.warga.some(x => x.no === w.no)) { ST.warga.push(w); PETA.add(w); }
       status(''); showMine(w); renderStats();
     } catch (err) {

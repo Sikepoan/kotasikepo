@@ -58,7 +58,7 @@ function kartu(ctx, x, y, d) {
   txt(ctx, 'KOTA PALING KEPO', x + w - 12 - tw('KOTA PALING KEPO', 1), y + 22, 1, '#ffe0dc', null);
   const px = x + 14, py = y + 50;
   R(ctx, px, py, 72, 88, '#1c1c24'); R(ctx, px + 3, py + 3, 66, 82, '#8fd0fb'); R(ctx, px + 3, py + 58, 66, 27, '#72c44c');
-  ctx.save(); ctx.beginPath(); ctx.rect(px + 3, py + 3, 66, 82); ctx.clip(); avatar(ctx, px, py, d.av, d.kat === 'TUKANG'); ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.rect(px + 3, py + 3, 66, 82); ctx.clip(); if (window.WSPR) { const sp = WSPR.get({ no: d.no | 0, nama: d.nama, av: d.av, sosmed: d.sosmed }); ctx.imageSmoothingEnabled = false; ctx.drawImage(sp, 8, 6, 30, 36, px + 3, py + 4, 66, 80); } else avatar(ctx, px, py, d.av, d.kat === 'TUKANG'); ctx.restore();
   const fx = x + 98; let fy = y + 52; const maxW = w - 98 - 12;
   const field = (k, v, vc) => {
     txt(ctx, k, fx, fy, 1, '#8a5a2b', null);
