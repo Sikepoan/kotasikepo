@@ -550,6 +550,29 @@
           const q = lt < arrive ? lt / arrive : lt < done ? 1 : Math.max(0, 1 - (lt - done) / 6), x = src[0] + (h.x - src[0]) * q, y = src[1] + (h.y - src[1]) * q; e.pos = [x, y];
           const im = VI[e.fire ? 'x' : (h.x > src[0] ? 'polisi_r' : 'polisi')]; const MB = window.__IB && window.__IB.mobil;
           items.push([y + 0.1, () => { const [a1, b1] = toScreen(x, y), I = e.fire ? MB : im; if (!I || !I.complete || !I.naturalWidth) return; const hh = (e.fire ? 17 : 13) * z, ww = I.naturalWidth / I.naturalHeight * hh; cx.save(); cx.translate(a1, 0); if (e.fire && h.x > src[0]) cx.scale(-1, 1); cx.imageSmoothingEnabled = true; cx.drawImage(I, -ww / 2, b1 - hh * 0.85, ww, hh); cx.restore(); cx.imageSmoothingEnabled = false; const bl = Math.floor(now * 5) % 2; cx.fillStyle = bl ? 'rgba(255,50,50,0.5)' : 'rgba(50,120,255,0.5)'; cx.beginPath(); cx.arc(a1, b1 - hh * 0.85, 5 * z, 0, 7); cx.fill(); }]); } }
+      { // KERETA KELILING KOTA: rel melingkar + 4 stasiun, kereta berhenti tiap stasiun
+        const quad = (c0, r0, c1, r1, fill, line, lw) => { const P = [kAt(c0, r0), kAt(c1, r0), kAt(c1, r1), kAt(c0, r1)].map(q => toScreen(...q)); cx.beginPath(); P.forEach(([a, b], i) => i ? cx.lineTo(a, b) : cx.moveTo(a, b)); cx.closePath(); if (fill) { cx.fillStyle = fill; cx.fill(); } if (line) { cx.strokeStyle = line; cx.lineWidth = Math.max(1, z * (lw || 0.6)); cx.stroke(); } };
+        const LOOP = [[-14.6, -0.7], [23.4, -0.7], [23.4, 13.3], [-14.6, 13.3]], ST = [[17, -0.7, 0], [23.4, 5.6, 1], [8, 13.3, 2], [-14.6, 5, 3]];
+        const seg = LOOP.map((p0, k) => { const p1 = LOOP[(k + 1) % 4]; return Math.abs(p1[0] - p0[0]) + Math.abs(p1[1] - p0[1]); }), per = seg.reduce((a1, b1) => a1 + b1, 0);
+        const posOf = d => { d = ((d % per) + per) % per; let k = 0; while (d > seg[k]) { d -= seg[k]; k = (k + 1) % 4; } const p0 = LOOP[k], p1 = LOOP[(k + 1) % 4], q = d / seg[k]; return [p0[0] + (p1[0] - p0[0]) * q, p0[1] + (p1[1] - p0[1]) * q, k]; };
+        const stD = ST.map(([c, v]) => { let d = 0; for (let k = 0; k < 4; k++) { const p0 = LOOP[k], p1 = LOOP[(k + 1) % 4]; const on = (p0[1] === p1[1] && v === p0[1] && (c - p0[0]) * (c - p1[0]) <= 0) || (p0[0] === p1[0] && c === p0[0] && (v - p0[1]) * (v - p1[1]) <= 0); if (on) return d + Math.abs(c - p0[0]) + Math.abs(v - p0[1]); d += seg[k]; } return 0; }).sort((a1, b1) => a1 - b1);
+        // rel
+        for (let k = 0; k < 4; k++) { const [c0, v0] = LOOP[k], [c1, v1] = LOOP[(k + 1) % 4], hor = v0 === v1, a0 = Math.min(hor ? c0 : v0, hor ? c1 : v1), a1 = Math.max(hor ? c0 : v0, hor ? c1 : v1);
+          if (hor) quad(a0 - 0.2, v0 - 0.2, a1 + 0.2, v0 + 0.2, '#8a8478'); else quad(c0 - 0.2, a0 - 0.2, c0 + 0.2, a1 + 0.2, '#8a8478');
+          for (let a = a0; a <= a1; a += 0.22) { if (hor) quad(a - 0.04, v0 - 0.16, a + 0.04, v0 + 0.16, '#5a3a1a'); else quad(c0 - 0.16, a - 0.04, c0 + 0.16, a + 0.04, '#5a3a1a'); }
+          cx.strokeStyle = '#c8ccd4'; cx.lineWidth = Math.max(1, z * 0.6); cx.beginPath(); for (const o2 of [-0.08, 0.08]) { const P0 = toScreen(...kAt(hor ? a0 : c0 + o2, hor ? v0 + o2 : a0)), P1 = toScreen(...kAt(hor ? a1 : c0 + o2, hor ? v0 + o2 : a1)); cx.moveTo(...P0); cx.lineTo(...P1); } cx.stroke(); }
+        // stasiun
+        const IMR = window.__IMR || (window.__IMR = {}), SI = IMR.st || (IMR.st = Object.assign(new Image(), { src: 'img/stasiun.png' }));
+        const SR = IMR.str || (IMR.str = Object.assign(new Image(), { src: 'img/stasiun_r.png' }));
+        ST.forEach(([c, v]) => { const alongV = LOOP.some(([lc], k) => lc === c && LOOP[(k + 1) % 4][0] === c), sc0 = alongV ? c - 1.0 : c, sv0 = alongV ? v : v - 1.0, img = alongV ? SI : SR;
+          if (alongV) { quad(c - 0.62, v - 1.3, c - 0.22, v + 1.3, '#b8b0a0', '#6a6458', 0.5); quad(c - 0.3, v - 1.3, c - 0.22, v + 1.3, '#f2d030'); } else { quad(c - 1.3, v - 0.62, c + 1.3, v - 0.22, '#b8b0a0', '#6a6458', 0.5); quad(c - 1.3, v - 0.3, c + 1.3, v - 0.22, '#f2d030'); }
+          const [x, y] = kAt(sc0, sv0); items.push([y, () => { if (!img.complete || !img.naturalWidth) return; const hh = 56 * z, ww = img.naturalWidth / img.naturalHeight * hh, [a1, b1] = toScreen(x, y); cx.imageSmoothingEnabled = true; cx.drawImage(img, Math.round(a1 - ww / 2), Math.round(b1 - hh * 0.55), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]); });
+        // kereta: jalan, berhenti 4 dtk di tiap stasiun
+        const TR = window.__TRN || (window.__TRN = { d: 0, wait: 0, last: performance.now() / 1000, next: 0 }), now2 = performance.now() / 1000, dt2 = Math.min(0.1, now2 - TR.last); TR.last = now2;
+        if (TR.wait > 0) TR.wait -= dt2; else { const tgt = stD[TR.next], rem = ((tgt - TR.d) % per + per) % per, mv = 2.2 * dt2; if (rem <= mv) { TR.d = tgt; TR.wait = 4; TR.next = (TR.next + 1) % stD.length; } else TR.d = (TR.d + mv) % per; }
+        const KI = IMR.kr || (IMR.kr = Object.assign(new Image(), { src: 'img/kereta.png' })), KR = IMR.krr || (IMR.krr = Object.assign(new Image(), { src: 'img/kereta_r.png' }));
+        const [tc, tv, tk] = posOf(TR.d), [x, y] = kAt(tc, tv), im = (tk === 0 || tk === 2) ? KR : KI;
+        items.push([y + 0.2, () => { if (!im.complete || !im.naturalWidth) return; const hh = 26 * z, ww = im.naturalWidth / im.naturalHeight * hh, [a1, b1] = toScreen(x, y); cx.imageSmoothingEnabled = true; cx.drawImage(im, Math.round(a1 - ww / 2), Math.round(b1 - hh * 0.75), Math.round(ww), Math.round(hh)); cx.imageSmoothingEnabled = false; }]); }
       items.sort((p, q) => p[0] - q[0]).forEach(([, f]) => f());
       { // HELIKOPTER keliling Menara Udin
         const [mx, my] = toScreen(...kAt(12.7, 7.4)), ty = my - 112 * z, a = t * 0.7, hx = mx + Math.cos(a) * 42 * z, hy = ty - 18 * z + Math.sin(a) * 15 * z + Math.sin(t * 3) * 1.5 * z, fl = -Math.sin(a) >= 0 ? 1 : -1, u = z * 0.9;

@@ -62,7 +62,7 @@ window.SIKEPO_JOBS = [
   ['@bos69410', 'Sopir Truk', 'BEKERJA'],
   ['@syairaji02', 'Sopir', 'BEKERJA'],
   ['@resajr.123.resa', 'Pemilik Kilang Padi', 'BEKERJA'],
-  ['@ulyazhafirahihsan', 'Guru', 'NUNGGU GEDUNG'],
+  
   ['@araaaaraa985', 'Guru B. Indonesia', 'NUNGGU GEDUNG'],
   ['@may.mau.aja', 'Guru MTK', 'NUNGGU GEDUNG'],
   ['@imutttt094', 'Guru MTK', 'NUNGGU GEDUNG'],
@@ -89,12 +89,27 @@ window.SIKEPO_JOBS = [
   ['@naufal_kacung', 'Atlet Renang', 'NUNGGU GEDUNG'],
   ['@afiapip_008', 'Pilot', 'NUNGGU GEDUNG'],
   ['@faleh.akbar', 'Tukang Warnet (Falih)', 'NUNGGU GEDUNG'],
-  ['@zayyanalfarizi945', 'Pembalap Drag', 'NUNGGU GEDUNG']
+  ['@zayyanalfarizi945', 'Pembalap Drag', 'NUNGGU GEDUNG'],
+  ['@agamti1', 'Masinis', 'NUNGGU GEDUNG'],
+  ['@user2k150617', 'Masinis', 'NUNGGU GEDUNG'],
+  ['@fauzan.al61', 'Pelatih Bola', 'NUNGGU GEDUNG'],
+  ['@913reza', 'Coach Bola', 'NUNGGU GEDUNG'],
+  ['@ar._174', 'Pemilik Stadion', 'NUNGGU GEDUNG'],
+  ['@justhisyam07', 'Pelatih Bola (Hisyam)', 'NUNGGU GEDUNG'],
+  ['@anakvocalforever', 'Tukang Ronda', 'BEKERJA'],
+  ['@althfstecu', 'Hansip', 'BEKERJA'],
+  ['@aansnrj', 'Satpol PP (Aan)', 'BEKERJA'],
+  ['@yupi_permen', 'Damkar', 'BEKERJA'],
+  ['@ras_b3rry26', 'Guru', 'BEKERJA'],
+  ['@ulyazhafirahihsan', 'Guru', 'BEKERJA'],
+  ['@baim18974pendukungboboto', 'Guru Olahraga', 'BEKERJA'],
+  ['@denim_head19', 'CEO MBG (Ardi)', 'NUNGGU GEDUNG'],
+  ['@begadangminumkopi', 'Anggota DPR', 'NUNGGU GEDUNG']
 ];
 // Usulan bangunan dari komentar Day 8 (jumlah suara/permintaan). [nama, suara, status]
 window.SIKEPO_USULAN = [
-  ['Sekolah', 22, 'POLLING BESOK'], ['Warung Madura', 6, 'POLLING BESOK'], ['Stasiun Kereta', 2, 'POLLING BESOK'],
+  ['Stasiun Kereta', 9, 'DIBANGUN DAY 11'], ['Stadion Bola', 8, 'POLLING BESOK'], ['Warung Madura 24 Jam', 2, 'POLLING BESOK'], ['Kantor Kelurahan', 1, 'POLLING BESOK'],
   ['Markas Tentara / TNI', 9, 'ANTRE'], ['Lapangan Bola / Stadion', 5, 'ANTRE'], ['Kopdes', 3, 'ANTRE'], ['Bandara', 3, 'ANTRE'], ['Taman Kota', 2, 'SUDAH ADA LAHAN'],
   ['Kos-kosan', 1, 'ANTRE'], ['Kolam Renang', 1, 'ANTRE'], ['Warnet', 1, 'ANTRE'], ['Pom Bensin', 1, 'ANTRE'], ['Pesantren', 1, 'ANTRE'], ['Bank', 2, 'ANTRE'], ['Kantor Presiden', 1, 'ANTRE'], ['Musim (hujan/salju/kemarau)', 1, 'IDE FITUR'],
-  ['Minimarket', 20, 'SUDAH DIBANGUN'], ['Pemadam Kebakaran', 14, 'SUDAH DIBANGUN'], ['Rumah Sakit', 9, 'SUDAH DIBANGUN'], ['Masjid & Gereja (6 rumah ibadah)', 8, 'SUDAH DIBANGUN'], ['Kantor Polisi', 4, 'SUDAH DIBANGUN'], ['Sawah', 3, 'SUDAH DIBANGUN']
+  ['Sekolah (SD Sikepo)', 22, 'SUDAH DIBANGUN'], ['Minimarket', 20, 'SUDAH DIBANGUN'], ['Pemadam Kebakaran', 14, 'SUDAH DIBANGUN'], ['Rumah Sakit', 9, 'SUDAH DIBANGUN'], ['Masjid & Gereja (6 rumah ibadah)', 8, 'SUDAH DIBANGUN'], ['Kantor Polisi', 4, 'SUDAH DIBANGUN'], ['Sawah', 3, 'SUDAH DIBANGUN']
 ];
