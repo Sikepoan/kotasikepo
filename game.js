@@ -2,7 +2,7 @@
 (() => {
   const W = 256, H = 240, PAL = { sky: '#7ec8f0', sky2: '#a9dcf6', far: '#5f9e3a', rice1: '#86c255', rice2: '#5aa83a', dike: '#6b5a2e', water: '#8ea4b8' };
   let cv, cx, st = null, raf = 0;
-  const U = {}; ['u_tawa', 'u_bangga', 'u_sorak'].forEach(n => { U[n] = new Image(); U[n].src = 'img/g/' + n + '.png'; });
+  const U = {}; ['u_tawa', 'u_bangga', 'u_sorak'].forEach(n => { U[n] = new Image(); U[n].src = 'img/k/g/' + n + '.png'; });
   const BIRD = [['#7a4a22', '#b87a3a', '#f0d8a8'], ['#4a4a5a', '#7a7a8a', '#e0e0e8'], ['#a0301a', '#d8603a', '#f8d0a0']];
   function px(x, y, w, h, c) { cx.fillStyle = c; cx.fillRect(Math.round(x), Math.round(y), w, h); }
   function drawBird(b) { const [d, m, l] = BIRD[b.kind], f = Math.floor(b.t * 10) % 2, s = b.vx < 0 ? -1 : 1, x = 0, y = 0; cx.save(); cx.translate(Math.round(b.x), Math.round(b.y)); cx.scale(1.8, 1.8);
