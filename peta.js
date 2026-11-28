@@ -390,10 +390,10 @@
     cx.fillStyle = SMODE ? '#2b4a26' : FMODE ? '#1a2e24' : '#2c86d8'; cx.fillRect(0, 0, cv.width, cv.height);
     const z = cam.z * dpr; const [ox, oy] = toScreen(0, 0);
     if (SMODE) { const GR = window.__GR || (window.__GR = Object.assign(new Image(), { src: 'img/rumput.jpg' }));
-      const TG = window.__TG || (window.__TG = Object.assign(new Image(), { src: 'img/tex_grass.png' })), TD = window.__TD || (window.__TD = Object.assign(new Image(), { src: 'img/tex_dirt.png' }));
+      const TG = window.__TG || (window.__TG = Object.assign(new Image(), { src: 'img/k/rumput.png' })), TD = window.__TD || (window.__TD = Object.assign(new Image(), { src: 'img/tex_dirt.png' }));
       const pat = (img, sc) => { if (!img.complete || !img.naturalWidth) return null; const pt = cx.createPattern(img, 'repeat'), [a0, b0] = toScreen(0, 0); pt.setTransform(new DOMMatrix().translate(a0, b0).scale(z * sc)); return pt; };
-      const PG = pat(TG, 0.45), PD = pat(TD, 0.4);
-      cx.fillStyle = '#7fae45'; cx.fillRect(0, 0, cv.width, cv.height); if (PG) { cx.globalAlpha = 0.55; cx.fillStyle = PG; cx.fillRect(0, 0, cv.width, cv.height); const PG2 = pat(TG, 1.13); if (PG2) { cx.globalAlpha = 0.35; cx.fillStyle = PG2; cx.fillRect(0, 0, cv.width, cv.height); } cx.globalAlpha = 1; }
+      const PG = pat(TG, 1.0), PD = pat(TD, 0.4);
+      cx.fillStyle = '#5aa040'; cx.fillRect(0, 0, cv.width, cv.height); if (PG) { cx.imageSmoothingEnabled = false; cx.globalAlpha = 1; cx.fillStyle = PG; cx.fillRect(0, 0, cv.width, cv.height); const PG2 = null; if (PG2) { cx.globalAlpha = 0.35; cx.fillStyle = PG2; cx.fillRect(0, 0, cv.width, cv.height); } cx.globalAlpha = 1; }
       if (GR.complete && GR.naturalWidth) { const pt = cx.createPattern(GR, 'repeat'), [a0, b0] = toScreen(0, 0); pt.setTransform(new DOMMatrix().translate(a0, b0).scale(z * 0.22)); cx.globalAlpha = PG ? 0 : 0.28; cx.fillStyle = pt; cx.fillRect(0, 0, cv.width, cv.height); cx.globalAlpha = 1; }
       const quad = (c0, r0, c1, r1, fill, line, lw) => { const P = [kAt(c0, r0), kAt(c1, r0), kAt(c1, r1), kAt(c0, r1)].map(q => toScreen(...q)); cx.beginPath(); P.forEach(([a, b], i) => i ? cx.lineTo(a, b) : cx.moveTo(a, b)); cx.closePath(); if (fill) { cx.fillStyle = fill; cx.fill(); } if (line) { cx.strokeStyle = line; cx.lineWidth = Math.max(1, z * (lw || 0.6)); cx.stroke(); } };
       const R = ROWS(), VE = VEND(), V = []; for (let r = 0; r <= R + 1; r += 2) V.push(Math.floor(r / 2) * 2.7 + 0.25);
